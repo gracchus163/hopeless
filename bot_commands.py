@@ -26,6 +26,7 @@ class Command(object):
         self.event = event
         self.args = self.command.split()[1:]
 
+
     async def process(self):
         """Process the command"""
         if self.command.startswith("echo"):
@@ -42,6 +43,7 @@ class Command(object):
         print("args are:" + " ".join([str(x) for x in self.args]))
         email = str(self.args[0])
         print("email: " + email)
+        print("from: " + self.event.sender)
         if not valid_email(email):
             response = "Not a valid email, try again. request arguments are: $email $token"
             await send_text_to_room(self.client, self.room.room_id, response)
@@ -54,6 +56,9 @@ class Command(object):
         if valid_token(token):
             response = "Verified, congrats. You should now be invited to the official rooms"
             await send_text_to_room(self.client, self.room.room_id, response)
+            #response = "/invite "+ self.event.sender
+            #await send_text_to_room(self.client, "!RswBmKZslQchGCffFZ:hope.net", response, True, False)
+            await self.client.room_invite("!RswBmKZslQchGCffFZ:hope.net", self.event.sender)
    #        invite(user)
             return
         else:
