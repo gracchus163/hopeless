@@ -4,10 +4,7 @@ def valid_email(email):
     else:
         return False
 
-def valid_token(token):
-    if token == "123456":
-        return True
-    else:
-        False
-def invite(username):
-    print("inviting" + username)
+def valid_token(token, tokens):
+    if token in tokens:
+        return tokens[token] == 'unused'
+    return False

@@ -2,6 +2,7 @@ import logging
 import re
 import os
 import yaml
+import csv
 import sys
 from typing import List, Any
 from errors import ConfigError
@@ -63,6 +64,24 @@ class Config(object):
         self.homeserver_url = self._get_cfg(["matrix", "homeserver_url"], required=True)
 
         self.command_prefix = self._get_cfg(["command_prefix"], default="!c") + " "
+        self.rooms_path = self._get_cfg(["rooms_path"],required=True)
+        #self.rooms = ["!RswBmKZslQchGCffFZ:hope.net", "!YNURDuQYkZTdpBysip:hope.net"]
+        self.tokens_path = self._get_cfg(["tokens_path"], required=True)
+        #self.tokens = {"123456": False, "009922" : False, "334433" : False}
+        with open(self.rooms_path, 'rt') as f:
+                self.rooms = f.read().splitlines()
+                print(self.rooms)
+        with open(self.tokens_path, 'rt') as f:
+            reader = csv.reader(f)
+            self.tokens = dict(reader)
+            """for k,v in reader:
+                if v == 'f':
+                    self.tokens[k] = False
+                elif v == 't':
+                    self.tokens[k] = True
+                else:
+                    sys.exit("token value should be t or f")"""
+        print(self.tokens)
 
     def _get_cfg(
             self,

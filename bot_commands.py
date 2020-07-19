@@ -53,13 +53,19 @@ class Command(object):
             response = "Token must be 36 characters, check your ticket again or contact valka"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        if valid_token(token):
+        if valid_token(token, self.config.tokens):
             response = "Verified, congrats. You should now be invited to the official rooms"
             await send_text_to_room(self.client, self.room.room_id, response)
             #response = "/invite "+ self.event.sender
             #await send_text_to_room(self.client, "!RswBmKZslQchGCffFZ:hope.net", response, True, False)
-            await self.client.room_invite("!RswBmKZslQchGCffFZ:hope.net", self.event.sender)
-   #        invite(user)
+            print(self.config.rooms)
+            for s in self.config.rooms:
+                #await self.client.room_invite("!RswBmKZslQchGCffFZ:hope.net", self.event.sender)
+                await self.client.room_invite(s, self.event.sender)
+            self.config.tokens[token] = "used"
+            with open('update.csv', 'w') as f:
+                for key in self.config.tokens.keys():
+                    f.write("%s,%s\n"%(key,self.config.tokens[key]))
             return
         else:
             response = "This is not a valid token, check your ticket again or contact valka"
