@@ -14,6 +14,7 @@ Running:
 * Support for adding a user to a subset of rooms, not all rooms listed in the config
 * Automatically message all new members with instructions on how to be invited to rooms
 * Populate room list via API so no need to add rooms manually to config
+* Users should be able to message the bot to get another invite (!join or similar) for any room they have permission to be in, in case of mods needing to jump into a room or re-joining rooms they've left
 
 ## Project structure
 My main changes are in bot_commands.py: def _process_request(self)  
