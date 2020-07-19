@@ -1,26 +1,12 @@
-# Nio Template
+### Hope 2020 matrix bot
+Based on the extremely useful nio-template
+Users message the bot with their ticket token which is validated and they get invited to the conference matrix rooms.
+## Running
+git clone and copy sameple.config.yaml to config.yaml and fill in the user and server details
+rooms.csv holds a newline separated list of the room ids (no commas)
+tokens.csv holds 64 char tokens followed by whether they are 'used' or 'unused'
 
-A template for creating bots with
-[matrix-nio](https://github.com/poljar/matrix-nio). The documentation for
-matrix-nio can be found
-[here](https://matrix-nio.readthedocs.io/en/latest/nio.html).
-
-## Projects using nio-template
-
-* [anoadragon453/msc-chatbot](https://github.com/anoadragon453/msc-chatbot) - A matrix bot for matrix spec proposals
-* [anoadragon453/matrix-episode-bot](https://github.com/anoadragon453/matrix-episode-bot) - A matrix bot to post episode links
-* [TheForcer/vision-nio](https://github.com/TheForcer/vision-nio) - A general purpose matrix chatbot
-* [anoadragon453/matrix-reminder-bot](https://github.com/anoadragon453/matrix-reminder-bot
-) - A matrix bot to remind you about things
-* [anoadragon453/drawing-challenge-bot](https://github.com/anoadragon453/drawing-challenge-bot) - A matrix bot to
-post historical, weekly art challenges from reddit to a room
-* [alturiak/nio-smith](https://github.com/alturiak/nio-smith) - A modular bot for @matrix-org that can be dynamically
-extended by plugins
-
-
-Want your project listed here? [Edit this
-doc!](https://github.com/anoadragon453/nio-template/edit/master/README.md)
-
+python main.py
 ## Project structure
 
 ### `main.py`
@@ -115,8 +101,3 @@ The sample configuration file. People running your bot should be advised to
 copy this file to `config.yaml`, then edit it according to their needs. Be sure
 never to check the edited `config.yaml` into source control since it'll likely
 contain sensitive details like passwords!
-
-## Questions?
-
-Any questions? Ask in
-[#nio-template:amorgan.xyz](https://matrix.to/#/!vmWBOsOkoOtVHMzZgN:amorgan.xyz?via=amorgan.xyz)!

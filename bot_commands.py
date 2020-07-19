@@ -29,14 +29,10 @@ class Command(object):
 
     async def process(self):
         """Process the command"""
-        if self.command.startswith("echo"):
-            await self._echo()
-        elif self.command.startswith("help"):
+        if self.command.startswith("help"):
             await self._show_help()
         elif self.command.startswith("request"):
             await self._process_request()
-        else:
-            await self._unknown_command()
 
     async def _process_request(self):
         """!h request $token"""
@@ -68,31 +64,10 @@ class Command(object):
 
 
     
-    async def _echo(self):
-        """Echo back the command's arguments"""
-        response = " ".join(self.args)
-        await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _show_help(self):
         """Show the help text"""
         if not self.args:
-            text = ("Hello, I am a bot made with matrix-nio! Use `help commands` to view "
-                    "available commands.")
+            text = ("Hello, I am a bot made with matrix-nio! To get invited to the official conference channels message me with request $mytoken")
             await send_text_to_room(self.client, self.room.room_id, text)
             return
-
-        topic = self.args[0]
-        if topic == "rules":
-            text = "These are the rules!"
-        elif topic == "commands":
-            text = "Available commands"
-        else:
-            text = "Unknown help topic!"
-        await send_text_to_room(self.client, self.room.room_id, text)
-
-    async def _unknown_command(self):
-        await send_text_to_room(
-            self.client,
-            self.room.room_id,
-            f"Unknown command '{self.command}'. Try the 'help' command for more information.",
-        )

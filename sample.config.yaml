@@ -41,3 +41,5 @@ logging:
   console_logging:
     # Whether logging to the console is enabled
     enabled: true
+rooms_path: "rooms.csv"
+tokens_path: "tokens.csv"
