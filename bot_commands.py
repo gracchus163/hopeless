@@ -1,5 +1,5 @@
 from chat_functions import send_text_to_room
-from bot_actions import valid_email, valid_token
+from bot_actions import valid_token
 
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
@@ -39,18 +39,12 @@ class Command(object):
             await self._unknown_command()
 
     async def _process_request(self):
-        """!h request $email $token"""
+        """!h request $token"""
         print("args are:" + " ".join([str(x) for x in self.args]))
-        email = str(self.args[0])
-        print("email: " + email)
         print("from: " + self.event.sender)
-        if not valid_email(email):
-            response = "Not a valid email, try again. request arguments are: $email $token"
-            await send_text_to_room(self.client, self.room.room_id, response)
-            return
-        token = str(self.args[1])
+        token = str(self.args[0])
         if len(token) != 6:
-            response = "Token must be 36 characters, check your ticket again or contact valka"
+            response = "Token must be 64 characters, check your ticket again or contact valka"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         if valid_token(token, self.config.tokens):
