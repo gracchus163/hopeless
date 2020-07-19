@@ -1,4 +1,4 @@
-### Hope 2020 matrix bot
+# Hope 2020 matrix bot
 Based on the extremely useful nio-template
 Users message the bot with their ticket token which is validated and they get invited to the conference matrix rooms.
 ## Running
@@ -8,7 +8,9 @@ tokens.csv holds 64 char tokens followed by whether they are 'used' or 'unused'
 
 python main.py
 ## Project structure
-
+My main changes are in bot_commands.py: def _process_request(self)
+	bot_actions.py
+	config.py:67-84
 ### `main.py`
 
 Initialises the config file, the bot store, and nio's AsyncClient (which is
