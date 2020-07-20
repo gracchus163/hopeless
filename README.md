@@ -6,11 +6,20 @@ git clone and copy sameple.config.yaml to config.yaml and fill in the user and s
 rooms.csv holds a newline separated list of the room ids (no commas)
 tokens.csv holds 64 char tokens followed by whether they are 'used' or 'unused'
 
-python main.py
+Running:
+
+`python main.py`
+
+**TODO** in order of importance:
+* Support for adding a user to a subset of rooms, not all rooms listed in the config
+* Automatically message all new members with instructions on how to be invited to rooms
+* Populate room list via API so no need to add rooms manually to config
+* Users should be able to message the bot to get another invite (!join or similar) for any room they have permission to be in, in case of mods needing to jump into a room or re-joining rooms they've left
+
 ## Project structure
-My main changes are in bot_commands.py: def _process_request(self)
-	bot_actions.py
-	config.py:67-84
+My main changes are in bot_commands.py: def _process_request(self)  
+	bot_actions.py  
+	config.py:67-84  
 ### `main.py`
 
 Initialises the config file, the bot store, and nio's AsyncClient (which is
