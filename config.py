@@ -70,7 +70,6 @@ class Config(object):
         #self.tokens = {"123456": False, "009922" : False, "334433" : False}
         with open(self.rooms_path, 'rt') as f:
                 self.rooms = f.read().splitlines()
-                print(self.rooms)
         with open(self.tokens_path, 'rt') as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)
@@ -82,6 +81,13 @@ class Config(object):
                 else:
                     sys.exit("token value should be t or f")"""
         print(self.tokens)
+        try:
+            f = open("volunteer.csv", "rt")
+            self.volunteer_rooms = f.read().splitlines()
+            f.close()
+        except FileNotFoundError:
+            print('No volunteer.csv')
+            self.volunteer_rooms = []
 
     def _get_cfg(
             self,

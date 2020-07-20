@@ -33,6 +33,8 @@ class Command(object):
             await self._show_help()
         elif self.command.startswith("request"):
             await self._process_request()
+        elif self.command.startswith("volunteer"):
+            await self._volunteer_request()
 
     async def _process_request(self):
         """!h request $token"""
@@ -49,9 +51,9 @@ class Command(object):
             #response = "/invite "+ self.event.sender
             #await send_text_to_room(self.client, "!RswBmKZslQchGCffFZ:hope.net", response, True, False)
             print(self.config.rooms)
-            for s in self.config.rooms:
+            for r in self.config.rooms:
                 #await self.client.room_invite("!RswBmKZslQchGCffFZ:hope.net", self.event.sender)
-                await self.client.room_invite(s, self.event.sender)
+                await self.client.room_invite(r, self.event.sender)
             self.config.tokens[token] = "used"
             with open('update.csv', 'w') as f:
                 for key in self.config.tokens.keys():
@@ -62,8 +64,11 @@ class Command(object):
             await send_text_to_room(self.client, self.room.room_id, response)
             return
 
-
-    
+    async def _volunteer_request(self):
+        response = "Inviting you to the HOPE volunteer rooms"
+        await send_text_to_room(self.client, self.room.room_id, response)
+        for r in self.config.volunteer_rooms:
+            await self.client.room_invite(r, self.event.sender)
 
     async def _show_help(self):
         """Show the help text"""
