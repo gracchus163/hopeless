@@ -68,27 +68,41 @@ class Config(object):
         #self.rooms = ["!RswBmKZslQchGCffFZ:hope.net", "!YNURDuQYkZTdpBysip:hope.net"]
         self.tokens_path = self._get_cfg(["tokens_path"], required=True)
         #self.tokens = {"123456": False, "009922" : False, "334433" : False}
-        with open(self.rooms_path, 'rt') as f:
-                self.rooms = f.read().splitlines()
         with open(self.tokens_path, 'rt') as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)
-            """for k,v in reader:
-                if v == 'f':
-                    self.tokens[k] = False
-                elif v == 't':
-                    self.tokens[k] = True
-                else:
-                    sys.exit("token value should be t or f")"""
-        print(self.tokens)
+        with open(self.rooms_path, 'rt') as f:
+                self.rooms = f.read().splitlines()
         try:
-            f = open("volunteer.csv", "rt")
+            f = open("volunteers.csv", "rt")
+            reader = csv.reader(f)
+            self.volunteer_tokens = dict(reader)
+            f.close()
+        except FileNotFoundError:
+            print('No volunteers.csv')
+            self.volunteer_tokens = []
+        try:
+            f = open("volunteer_rooms.csv", "rt")
             self.volunteer_rooms = f.read().splitlines()
             f.close()
         except FileNotFoundError:
-            print('No volunteer.csv')
+            print('No volunteer_rooms.csv')
             self.volunteer_rooms = []
-
+        try:
+            f = open("presenters.csv", "rt")
+            reader = csv.reader(f)
+            self.presenter_tokens = dict(reader)
+            f.close()
+        except FileNotFoundError:
+            print('No presenters.csv')
+            self.presenter_tokens = []
+        try:
+            f = open("presenter_rooms.csv", "rt")
+            self.presenter_rooms = f.read().splitlines()
+            f.close()
+        except FileNotFoundError:
+            print('No presenter_rooms.csv')
+            self.presenter_rooms = []
     def _get_cfg(
             self,
             path: List[str],

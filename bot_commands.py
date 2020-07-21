@@ -1,5 +1,5 @@
 from chat_functions import send_text_to_room
-from bot_actions import valid_token
+from bot_actions import valid_token, community_invite
 
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
@@ -32,35 +32,51 @@ class Command(object):
         if self.command.startswith("help"):
             await self._show_help()
         elif self.command.startswith("request"):
-            await self._process_request()
+            await self._process_request("attendee")
         elif self.command.startswith("volunteer"):
             await self._volunteer_request()
+            #await self._process_request("volunteer")
+        elif self.command.startswith("presenter"):
+            await self._process_request("presenter")
+        elif self.command.startswith("hack"):
+            await self._the_planet()
+        elif self.command.startswith("trashing"):
+            await self._trashing()
 
-    async def _process_request(self):
-        """!h request $token"""
+    async def _process_request(self, group):
+        """!h $group $token"""
         print("args are:" + " ".join([str(x) for x in self.args]))
         print("from: " + self.event.sender)
         token = str(self.args[0])
-        if len(token) != 6:
-            response = "Token must be 64 characters, check your ticket again or contact valka"
+        if len(token) != 64:
+            response = "Token must be 64 characters, check your ticket again or contact aestetix or valka"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        if valid_token(token, self.config.tokens):
-            response = "Verified, congrats. You should now be invited to the official rooms"
+        tokens = self.config.tokens
+        rooms = self.config.rooms
+        filename = "tokens.csv"
+        if group == "presenter":
+            tokens = self.config.presenter_tokens
+            rooms = self.config.presenter_rooms
+            filename = "presenters.csv"
+        elif group == "volunteer":
+            tokens = self.config.volunteer_tokens
+            rooms = self.config.volunteer_rooms
+            filename = "volunteers.csv"
+
+        if valid_token(token, tokens):
+            response = "Verified, congrats. You should now be invited to the {} rooms".format(group)
             await send_text_to_room(self.client, self.room.room_id, response)
-            #response = "/invite "+ self.event.sender
-            #await send_text_to_room(self.client, "!RswBmKZslQchGCffFZ:hope.net", response, True, False)
-            print(self.config.rooms)
-            for r in self.config.rooms:
-                #await self.client.room_invite("!RswBmKZslQchGCffFZ:hope.net", self.event.sender)
+            print(rooms)
+            for r in rooms:
                 await self.client.room_invite(r, self.event.sender)
-            self.config.tokens[token] = "used"
-            with open('update.csv', 'w') as f:
-                for key in self.config.tokens.keys():
-                    f.write("%s,%s\n"%(key,self.config.tokens[key]))
+            tokens[token] = "used"
+            with open(filename, 'w') as f:
+                for key in tokens.keys():
+                    f.write("%s,%s\n"%(key,tokens[key]))
             return
         else:
-            response = "This is not a valid token, check your ticket again or contact valka"
+            response = "This is not a valid token, check your ticket again or contact aestetix or valka"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
 
@@ -69,6 +85,8 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, response)
         for r in self.config.volunteer_rooms:
             await self.client.room_invite(r, self.event.sender)
+        #community_invite(self.client, self.config, self.event.sender)
+        return
 
     async def _show_help(self):
         """Show the help text"""
@@ -76,3 +94,15 @@ class Command(object):
             text = ("Hello, I am a bot made with matrix-nio! To get invited to the official conference channels message me with request $mytoken")
             await send_text_to_room(self.client, self.room.room_id, text)
             return
+    async def _the_planet(self):
+        text = "HACK THE PLANET https://youtu.be/YV78vobCyIo?t=55"
+        await send_text_to_room(self.client, self.room.room_id, text)
+        return
+
+    async def _trashing(self):
+        text = """They\'re TRASHING our rights, man! They\'re
+	TRASHING the flow of data! They\'re TRASHING!
+	TRASHING! TRASHING! HACK THE PLANET! HACK
+	THE PLANET!"""
+        await send_text_to_room(self.client, self.room.room_id, text)
+        return
