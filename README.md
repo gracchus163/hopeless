@@ -9,7 +9,7 @@ rooms.csv holds a newline separated list of the room ids (no commas)
 tokens.csv holds 64 char tokens followed by whether they are 'used' or 'unused'
 
 Running with docker:
-`docker run -v $(pwd)/config.yaml:/config.yaml hopebot:latest`
+`docker run -v $(pwd)/config.yaml:/config.yaml hopeless:latest`
 
 Running:
 
