@@ -2,19 +2,22 @@
 Based on the extremely useful nio-template
 Users message the bot with their ticket token which is validated and they get invited to the conference matrix rooms.
 ## Running
-git clone and copy sameple.config.yaml to config.yaml and fill in the user and server details
+To build with docker: run `docker build -f docker/Dockerfile -t hopeless:latest .` in the repo root dir.
+
+git clone and copy sample.config.yaml to config.yaml and fill in the user and server details
 rooms.csv holds a newline separated list of the room ids (no commas)
 tokens.csv holds 64 char tokens followed by whether they are 'used' or 'unused'
+
+Running with docker:
+`docker run -v $(pwd)/config.yaml:/config.yaml hopebot:latest`
 
 Running:
 
 `python main.py`
 
 **TODO** in order of importance:
-* Support for adding a user to a subset of rooms, not all rooms listed in the config
-* Automatically message all new members with instructions on how to be invited to rooms
-* Populate room list via API so no need to add rooms manually to config
-* Users should be able to message the bot to get another invite (!join or similar) for any room they have permission to be in, in case of mods needing to jump into a room or re-joining rooms they've left
+* Nice, helpful messages
+* "welcome-bot" functionality
 
 ## Project structure
 My main changes are in bot_commands.py: def _process_request(self)  
