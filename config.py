@@ -67,6 +67,8 @@ class Config(object):
         self.rooms_path = self._get_cfg(["rooms_path"],required=True)
         self.tokens_path = self._get_cfg(["tokens_path"], required=True)
         self.community = self._get_cfg(["community"], required=False)
+        self.volunteer_community = self._get_cfg(["volunteer_community"], required=False)
+        self.presenter_community = self._get_cfg(["presenter_community"], required=False)
         with open(self.tokens_path, 'rt') as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)

@@ -12,10 +12,10 @@ def valid_token(token, tokens,sender):
             return True, msg
     return False, ""
 
-async def community_invite(client, config, sender):#
-    if not config.community:
+async def community_invite(client, group, sender):#
+    if not group:
         return
-    path = "groups/{}/admin/users/invite/{}".format(config.community,sender)
+    path = "groups/{}/admin/users/invite/{}".format(group,sender)
     data = {"user_id":sender}
     query_parameters = {"access_token": client.access_token}
     path = Api._build_path(path, query_parameters)

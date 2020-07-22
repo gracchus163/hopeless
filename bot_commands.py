@@ -60,14 +60,17 @@ class Command(object):
             return
         tokens = self.config.tokens
         rooms = self.config.rooms
+        group = self.config.community
         filename = "tokens.csv"
         if group == "presenter":
             tokens = self.config.presenter_tokens
             rooms = self.config.presenter_rooms
+            group = self.config.presenter_community
             filename = "presenters.csv"
         elif group == "volunteer":
             tokens = self.config.volunteer_tokens
             rooms = self.config.volunteer_rooms
+            group = self.config.volunteer_community
             filename = "volunteers.csv"
 
         valid, h = valid_token(token, tokens,self.event.sender)
@@ -76,7 +79,7 @@ class Command(object):
             await send_text_to_room(self.client, self.room.room_id, response)
             print(rooms)
             await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
-            await community_invite(self.client, self.config, self.event.sender)
+            await community_invite(self.client, group, self.event.sender)
             for r in rooms:
                 await self.client.room_invite(r, self.event.sender)
             if tokens[h] == "unused":
@@ -96,7 +99,7 @@ class Command(object):
         for r in self.config.volunteer_rooms:
             await self.client.room_invite(r, self.event.sender)
         await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
-        await community_invite(self.client, self.config, self.event.sender)
+        await community_invite(self.client, self.config.volunteer_community, self.event.sender)
         return
 
     async def _show_help(self):
