@@ -33,6 +33,8 @@ class Command(object):
             await self._show_help()
         elif self.command.startswith("request"):
             await self._process_request("attendee")
+        elif self.command.startswith("ticket"):
+            await self._process_request("attendee")
         elif self.command.startswith("volunteer"):
             await self._volunteer_request()
             #await self._process_request("volunteer")
@@ -45,6 +47,10 @@ class Command(object):
 
     async def _process_request(self, group):
         """!h $group $token"""
+        if not self.args: 
+            response = "You need to add your token after {}".format(self.command)
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
         print("args are:" + " ".join([str(x) for x in self.args]))
         print("from: " + self.event.sender)
         token = str(self.args[0])
@@ -64,16 +70,20 @@ class Command(object):
             rooms = self.config.volunteer_rooms
             filename = "volunteers.csv"
 
-        if valid_token(token, tokens):
+        valid, h = valid_token(token, tokens,self.event.sender)
+        if valid:
             response = "Verified, congrats. You should now be invited to the {} rooms".format(group)
             await send_text_to_room(self.client, self.room.room_id, response)
             print(rooms)
+            await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
+            await community_invite(self.client, self.config, self.event.sender)
             for r in rooms:
                 await self.client.room_invite(r, self.event.sender)
-            tokens[token] = "used"
-            with open(filename, 'w') as f:
-                for key in tokens.keys():
-                    f.write("%s,%s\n"%(key,tokens[key]))
+            if tokens[h] == "unused":
+                tokens[h] = self.event.sender
+                with open(filename, 'w') as f:
+                    for key in tokens.keys():
+                        f.write("%s,%s\n"%(key,tokens[key]))
             return
         else:
             response = "This is not a valid token, check your ticket again or contact aestetix or valka"
@@ -85,13 +95,14 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, response)
         for r in self.config.volunteer_rooms:
             await self.client.room_invite(r, self.event.sender)
-        #community_invite(self.client, self.config, self.event.sender)
+        await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
+        await community_invite(self.client, self.config, self.event.sender)
         return
 
     async def _show_help(self):
         """Show the help text"""
         if not self.args:
-            text = ("Hello, I am a bot made with matrix-nio! To get invited to the official conference channels message me with request $mytoken")
+            text = ("Hello, I am a bot made with matrix-nio! To get invited to the official conference channels message me with ticket $mytoken")
             await send_text_to_room(self.client, self.room.room_id, text)
             return
     async def _the_planet(self):
@@ -106,3 +117,6 @@ class Command(object):
 	THE PLANET!"""
         await send_text_to_room(self.client, self.room.room_id, text)
         return
+    async def _group(self):
+        await send_text_to_room(self.client, self.room.room_id, "inviting to group")
+        await community_invite(self.client, self.config, self.event.sender)

@@ -43,3 +43,4 @@ logging:
     enabled: true
 rooms_path: "rooms.csv"
 tokens_path: "tokens.csv"
+community: "+name:server.net"

@@ -65,9 +65,8 @@ class Config(object):
 
         self.command_prefix = self._get_cfg(["command_prefix"], default="!c") + " "
         self.rooms_path = self._get_cfg(["rooms_path"],required=True)
-        #self.rooms = ["!RswBmKZslQchGCffFZ:hope.net", "!YNURDuQYkZTdpBysip:hope.net"]
         self.tokens_path = self._get_cfg(["tokens_path"], required=True)
-        #self.tokens = {"123456": False, "009922" : False, "334433" : False}
+        self.community = self._get_cfg(["community"], required=False)
         with open(self.tokens_path, 'rt') as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)
