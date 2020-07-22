@@ -78,11 +78,11 @@ class Command(object):
             response = "Verified, congrats. You should now be invited to the {} rooms".format(group)
             await send_text_to_room(self.client, self.room.room_id, response)
             print(rooms)
-            await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
-            await community_invite(self.client, group, self.event.sender)
             for r in rooms:
                 await self.client.room_invite(r, self.event.sender)
             if tokens[h] == "unused":
+                await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
+                await community_invite(self.client, group, self.event.sender)
                 tokens[h] = self.event.sender
                 with open(filename, 'w') as f:
                     for key in tokens.keys():
