@@ -55,7 +55,7 @@ class Command(object):
         print("from: " + self.event.sender)
         token = str(self.args[0])
         if len(token) != 64:
-            response = "Token must be 64 characters, check your ticket again or contact aestetix or valka"
+            response = "Token must be 64 characters, check your ticket again or if you have trouble, please send an email to helpdesk2020@helpdesk.hope.net"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         tokens = self.config.tokens
@@ -75,13 +75,13 @@ class Command(object):
 
         valid, h = valid_token(token, tokens,self.event.sender)
         if valid:
-            response = "Verified, congrats. You should now be invited to the {} rooms".format(group)
+            response = "Verified ticket. You should now be invited to the {} rooms.".format(group)
             await send_text_to_room(self.client, self.room.room_id, response)
             print(rooms)
             for r in rooms:
                 await self.client.room_invite(r, self.event.sender)
             if tokens[h] == "unused":
-                await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
+                await send_text_to_room(self.client, self.room.room_id, "Inviting you to the HOPE community...")
                 await community_invite(self.client, group, self.event.sender)
                 tokens[h] = self.event.sender
                 with open(filename, 'w') as f:
@@ -89,23 +89,23 @@ class Command(object):
                         f.write("%s,%s\n"%(key,tokens[key]))
             return
         else:
-            response = "This is not a valid token, check your ticket again or contact aestetix or valka"
+            response = "This is not a valid token, check your ticket again or email helpdesk2020@helpdesk.hope.net"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
 
     async def _volunteer_request(self):
-        response = "Inviting you to the HOPE volunteer rooms"
+        response = "Inviting you to the HOPE volunteer rooms..."
         await send_text_to_room(self.client, self.room.room_id, response)
         for r in self.config.volunteer_rooms:
             await self.client.room_invite(r, self.event.sender)
-        await send_text_to_room(self.client, self.room.room_id, "inviting you to the HOPE community")
+        await send_text_to_room(self.client, self.room.room_id, "Inviting you to the HOPE community")
         await community_invite(self.client, self.config.volunteer_community, self.event.sender)
         return
 
     async def _show_help(self):
         """Show the help text"""
         if not self.args:
-            text = ("Hello, I am a bot made with matrix-nio! To get invited to the official conference channels message me with ticket $mytoken")
+            text = ("Hello, I'm the HOPE CoreBot! To be invited to the official conference channels message me with `ticket <your-token-here>`. You can see more information (important for presenters) at https://wiki.hope.net/index.php?title=Conference_bot")
             await send_text_to_room(self.client, self.room.room_id, text)
             return
     async def _the_planet(self):
