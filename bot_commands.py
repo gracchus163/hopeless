@@ -36,8 +36,8 @@ class Command(object):
         elif self.command.startswith("ticket"):
             await self._process_request("attendee")
         elif self.command.startswith("volunteer"):
-            await self._volunteer_request()
-            #await self._process_request("volunteer")
+            #await self._volunteer_request()
+            await self._process_request("volunteer")
         elif self.command.startswith("presenter"):
             await self._process_request("presenter")
         elif self.command.startswith("hack"):
