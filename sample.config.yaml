@@ -44,5 +44,5 @@ logging:
 rooms_path: "rooms.csv"
 tokens_path: "tokens.csv"
 community: "+name:server.net"
-volunter_community: "+name:server.net"
+volunteer_community: "+name:server.net"
 presenter_community: "+name:server.net"
