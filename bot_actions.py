@@ -1,30 +1,35 @@
-from nio import Api
+# coding=utf-8
+
 from hashlib import sha256
-def valid_token(token, tokens,sender):
+
+from nio import Api
+
+
+def valid_token(token, tokens, sender):
     h = sha256()
     h.update(token.encode("utf-8"))
     msg = h.hexdigest()
     if msg in tokens:
-        if tokens[msg] == 'unused':
+        if tokens[msg] == "unused":
             return True, msg
         elif tokens[msg] == sender:
             return True, msg
     return False, ""
 
-async def community_invite(client, group, sender):#
+
+async def community_invite(client, group, sender):  #
     if not group:
         return
-    path = "groups/{}/admin/users/invite/{}".format(group,sender)
-    data = {"user_id":sender}
+    path = "groups/{}/admin/users/invite/{}".format(group, sender)
+    data = {"user_id": sender}
     query_parameters = {"access_token": client.access_token}
     path = Api._build_path(path, query_parameters)
     print(path)
-    await client.send("PUT",
-            path,
-            Api.to_json(data),
-            headers = {"Content-Type": "application/json"}
-            )
+    await client.send(
+        "PUT", path, Api.to_json(data), headers={"Content-Type": "application/json"}
+    )
     return
+
 
 def is_admin(user):
     user = str(user)
@@ -40,6 +45,7 @@ def is_admin(user):
     except FileNotFoundError:
         print("no admin.csv")
     return False
+
 
 def get_alias(roomid):
     return roomid

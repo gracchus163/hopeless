@@ -24,5 +24,8 @@ volunteer_rooms.csv
 presenters.csv
 presenter_rooms.csv
 
+# Data files
+store/
+
 # Log files
 *.log

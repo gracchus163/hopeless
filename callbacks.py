@@ -1,18 +1,15 @@
-from chat_functions import (
-    send_text_to_room,
-)
-from bot_commands import Command
-from nio import (
-    JoinError,
-)
-from message_responses import Message
+# coding=utf-8
 
 import logging
+
+from bot_commands import Command
+from message_responses import Message
+from nio import JoinError
+
 logger = logging.getLogger(__name__)
 
 
 class Callbacks(object):
-
     def __init__(self, client, store, config):
         """
         Args:
@@ -60,7 +57,7 @@ class Callbacks(object):
         # treat it as a command
         if has_command_prefix:
             # Remove the command prefix
-            msg = msg[len(self.command_prefix):]
+            msg = msg[len(self.command_prefix) :]
 
         command = Command(self.client, self.store, self.config, msg, room, event)
         await command.process()
@@ -75,7 +72,8 @@ class Callbacks(object):
             if type(result) == JoinError:
                 logger.error(
                     f"Error joining room {room.room_id} (attempt %d): %s",
-                    attempt, result.message,
+                    attempt,
+                    result.message,
                 )
             else:
                 break
