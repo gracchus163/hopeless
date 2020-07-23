@@ -26,3 +26,21 @@ async def community_invite(client, group, sender):#
             headers = {"Content-Type": "application/json"}
             )
     return
+
+def is_admin(user):
+    user = str(user)
+    print(user)
+    try:
+        f = open("admin.csv", "rt")
+        for nick in f.readlines():
+            print(nick)
+            if user == nick.rstrip():
+                f.close()
+                return True
+        f.close()
+    except FileNotFoundError:
+        print("no admin.csv")
+    return False
+
+def get_alias(roomid):
+    return roomid

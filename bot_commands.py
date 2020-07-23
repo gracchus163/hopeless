@@ -1,5 +1,6 @@
 from chat_functions import send_text_to_room
-from bot_actions import valid_token, community_invite
+from bot_actions import valid_token, community_invite, is_admin, get_alias
+from nio import RoomResolveAliasResponse
 
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
@@ -29,21 +30,25 @@ class Command(object):
 
     async def process(self):
         """Process the command"""
-        if self.command.startswith("help"):
+        trigger = self.command.lower()
+        if trigger.startswith("help"):
             await self._show_help()
-        elif self.command.startswith("request"):
+        elif trigger.startswith("request"):
             await self._process_request("attendee")
-        elif self.command.startswith("ticket"):
+        elif trigger.startswith("ticket"):
             await self._process_request("attendee")
-        elif self.command.startswith("volunteer"):
+        elif trigger.startswith("volunteer"):
             #await self._volunteer_request()
             await self._process_request("volunteer")
-        elif self.command.startswith("presenter"):
+        elif trigger.startswith("presenter"):
             await self._process_request("presenter")
-        elif self.command.startswith("hack"):
+        elif trigger.startswith("hack"):
             await self._the_planet()
-        elif self.command.startswith("trashing"):
+        elif trigger.startswith("trashing"):
             await self._trashing()
+        elif trigger.startswith("notice"):
+            if is_admin(self.event.sender):
+                await self._notice()
 
     async def _process_request(self, group):
         """!h $group $token"""
@@ -123,3 +128,21 @@ class Command(object):
     async def _group(self):
         await send_text_to_room(self.client, self.room.room_id, "inviting to group")
         await community_invite(self.client, self.config, self.event.sender)
+
+    async def _notice(self):
+        print("notice")
+        if len(self.args) < 2:
+            await send_text_to_room(self.client, self.room.room_id, "notice args: <room-alias\> <strings\>,,,")
+            return
+        resp = await self.client.room_resolve_alias(self.args[0])
+        if not isinstance(resp, RoomResolveAliasResponse):
+            print("bad room alias")
+            return
+        room_id = resp.room_id
+        msg = "@room " + ' '.join(map(str, self.args[1:]))
+        print("send {} to {}".format(msg,room_id))
+        await send_text_to_room(self.client, room_id, msg)
+        return
+    async def _invite(self):
+        #invite user to set of rooms
+        return
