@@ -4,8 +4,6 @@ def valid_token(token, tokens,sender):
     h = sha256()
     h.update(token.encode("utf-8"))
     msg = h.hexdigest()
-    print(msg)
-    print(tokens[msg])
     if msg in tokens:
         if tokens[msg] == 'unused':
             return True, msg
