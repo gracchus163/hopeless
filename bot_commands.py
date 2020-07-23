@@ -50,8 +50,8 @@ class Command(object):
             if is_admin(self.event.sender):
                 await self._notice()
 
-    async def _process_request(self, group):
-        """!h $group $token"""
+    async def _process_request(self, ticket_type):
+        """!h $ticket_type $token"""
         if not self.args: 
             response = "You need to add your token after {}".format(self.command)
             await send_text_to_room(self.client, self.room.room_id, response)
@@ -67,12 +67,13 @@ class Command(object):
         rooms = self.config.rooms
         group = self.config.community
         filename = "tokens.csv"
-        if group == "presenter":
+        if ticket_type == "presenter":
             tokens = self.config.presenter_tokens
             rooms = self.config.presenter_rooms
             group = self.config.presenter_community
             filename = "presenters.csv"
-        elif group == "volunteer":
+            print("presenter")
+        elif ticket_type == "volunteer":
             tokens = self.config.volunteer_tokens
             rooms = self.config.volunteer_rooms
             group = self.config.volunteer_community
@@ -80,7 +81,7 @@ class Command(object):
 
         valid, h = valid_token(token, tokens,self.event.sender)
         if valid:
-            response = "Verified ticket. You should now be invited to the {} rooms.".format(group)
+            response = "Verified ticket. You should now be invited to the {} rooms.".format(ticket_type)
             await send_text_to_room(self.client, self.room.room_id, response)
             print(rooms)
             for r in rooms:
