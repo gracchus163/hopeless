@@ -38,13 +38,12 @@ def is_admin(user):
     user = str(user)
     logging.debug("is_admin? %s", user)
     try:
-        f = open("admin.csv", "rt")
-        for nick in f.readlines():
-            logging.debug("is_admin line: %s", nick)
-            if user == nick.rstrip():
-                f.close()
-                return True
-        f.close()
+        with open("admin.csv", "r") as f:
+            for nick in f.readlines():
+                logging.debug("is_admin line: %s", nick)
+                if user == nick.rstrip():
+                    f.close()
+                    return True
     except FileNotFoundError:
         logging.error("No admin.csv")
     return False
