@@ -190,7 +190,7 @@ class Command(object):
         await community_invite(self.client, self.config, self.event.sender)
 
     async def _notice(self):
-        msg = "@room " + " ".join(map(str, self.args[1:]))
+        msg = "@room\n" + self.command.split(maxsplit=2)[2]
         logging.warning(
             "notice used by %s at %s to send: %r",
             self.event.sender,
