@@ -86,6 +86,9 @@ class Config(object):
         self.homeserver_url = self._get_cfg(["matrix", "homeserver_url"], required=True)
 
         self.command_prefix = self._get_cfg(["command_prefix"], default="!c") + " "
+        self.repeat_community_invite = self._get_cfg(
+            ["repeat_community_invite"], default=False
+        )
         self.rooms_path = self._get_cfg(["rooms_path"], required=True)
         self.tokens_path = self._get_cfg(["tokens_path"], required=True)
         self.community = self._get_cfg(["community"], required=False)
