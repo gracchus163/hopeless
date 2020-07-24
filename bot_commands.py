@@ -145,7 +145,9 @@ class Command(object):
                 # notify outside lock block
         response = (
             "This is not a valid token, check your ticket again or "
-            "email helpdesk2020@helpdesk.hope.net"
+            "email helpdesk2020@helpdesk.hope.net  \n"
+            "If you are a `volunteer` or `presenter`, use those commands "
+            "instead of `ticket`"
         )
         await send_text_to_room(self.client, self.room.room_id, response)
 
