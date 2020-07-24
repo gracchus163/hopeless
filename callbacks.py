@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from asyncio import create_task
 import logging
 
 from bot_commands import Command
@@ -60,7 +61,8 @@ class Callbacks(object):
             msg = msg[len(self.command_prefix) :]
 
         command = Command(self.client, self.store, self.config, msg, room, event)
-        await command.process()
+        # Spawn a task and don't wait for it
+        create_task(command.process())
 
     async def invite(self, room, event):
         """Callback for when an invite is received. Join the room specified in the invite"""
