@@ -42,6 +42,9 @@ logging:
   console_logging:
     # Whether logging to the console is enabled
     enabled: true
+
+repeat_community_invite: false
+
 rooms_path: "rooms.csv"
 tokens_path: "tokens.csv"
 community: "+name:server.net"
