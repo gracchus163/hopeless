@@ -1,8 +1,14 @@
 # coding=utf-8
 
+from asyncio import Lock
+
 from bot_actions import community_invite, is_admin, valid_token
 from chat_functions import send_text_to_room
 from nio import RoomResolveAliasResponse
+
+_attendee_token_lock = Lock()
+_presenter_token_lock = Lock()
+_volunteer_token_lock = Lock()
 
 
 class Command(object):
@@ -68,48 +74,54 @@ class Command(object):
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
+        lock = _attendee_token_lock
         tokens = self.config.tokens
         rooms = self.config.rooms
         group = self.config.community
         filename = "tokens.csv"
         if ticket_type == "presenter":
+            lock = _presenter_token_lock
             tokens = self.config.presenter_tokens
             rooms = self.config.presenter_rooms
             group = self.config.presenter_community
             filename = "presenters.csv"
-            print("presenter")
         elif ticket_type == "volunteer":
+            lock = _volunteer_token_lock
             tokens = self.config.volunteer_tokens
             rooms = self.config.volunteer_rooms
             group = self.config.volunteer_community
             filename = "volunteers.csv"
 
-        valid, h = valid_token(token, tokens, self.event.sender)
-        if valid:
-            response = "Verified ticket. You should now be invited to the {} rooms.".format(ticket_type)
-            await send_text_to_room(self.client, self.room.room_id, response)
-            print(rooms)
-            for r in rooms:
-                await self.client.room_invite(r, self.event.sender)
-            if tokens[h] == "unused":
-                await send_text_to_room(
-                    self.client,
-                    self.room.room_id,
-                    "Inviting you to the HOPE community...",
+        # Make sure other tasks don't interfere with our token[] manipulation or writing
+        async with lock:
+            valid, h = valid_token(token, tokens, self.event.sender)
+            if valid:
+                response = "Verified ticket. You should now be invited to the {} rooms.".format(
+                    ticket_type
                 )
-                await community_invite(self.client, group, self.event.sender)
-                tokens[h] = self.event.sender
-                with open(filename, "w") as f:
-                    for key in tokens.keys():
-                        f.write("%s,%s\n" % (key, tokens[key]))
-            return
-        else:
-            response = (
-                "This is not a valid token, check your ticket again or "
-                "email helpdesk2020@helpdesk.hope.net"
-            )
-            await send_text_to_room(self.client, self.room.room_id, response)
-            return
+                await send_text_to_room(self.client, self.room.room_id, response)
+                print(rooms)
+                for r in rooms:
+                    await self.client.room_invite(r, self.event.sender)
+                if tokens[h] == "unused":
+                    await send_text_to_room(
+                        self.client,
+                        self.room.room_id,
+                        "Inviting you to the HOPE community...",
+                    )
+                    await community_invite(self.client, group, self.event.sender)
+                    tokens[h] = self.event.sender
+                    with open(filename, "w") as f:
+                        for key in tokens.keys():
+                            f.write("%s,%s\n" % (key, tokens[key]))
+                return
+            else:
+                response = (
+                    "This is not a valid token, check your ticket again or "
+                    "email helpdesk2020@helpdesk.hope.net"
+                )
+                await send_text_to_room(self.client, self.room.room_id, response)
+                return
 
     async def _volunteer_request(self):
         response = "Inviting you to the HOPE volunteer rooms..."
