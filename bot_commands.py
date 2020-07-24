@@ -106,22 +106,13 @@ class Command(object):
             if valid:
                 response = (
                     "Verified ticket. You should now be invited to the HOPE "
-                    f"{ticket_type} chat rooms."
+                    f"{ticket_type} chat rooms and community."
                 )
-                if tokens[h] == "unused" and not self.config.repeat_community_invite:
-                    # Unused token, can't resend? Warn.
-                    response += (
-                        "  \nBe sure to accept the community invite, "
-                        "we can only send it once!"
-                    )
                 await send_text_to_room(self.client, self.room.room_id, response)
-
                 logging.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
                 for r in rooms:
                     await self.client.room_invite(r, self.event.sender)
-
-                if tokens[h] == "unused" or self.config.repeat_community_invite:
-                    await community_invite(self.client, group, self.event.sender)
+                await community_invite(self.client, group, self.event.sender)
 
                 if tokens[h] == "unused":
                     tokens[h] = self.event.sender
