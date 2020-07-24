@@ -2,6 +2,7 @@
 
 from asyncio import Lock
 import logging
+from os import fsync, rename
 
 from bot_actions import community_invite, is_admin, valid_token
 from chat_functions import send_text_to_room
@@ -114,9 +115,14 @@ class Command(object):
 
                 if tokens[h] == "unused":
                     tokens[h] = self.event.sender
-                    with open(filename, "w") as f:
+                    filename_temp = filename + ".atomic"
+                    with open(filename_temp, "w") as f:
                         for key in tokens.keys():
                             f.write("%s,%s\n" % (key, tokens[key]))
+                        f.flush()
+                        fsync(f.fileno())
+                    rename(filename_temp, filename)
+
                 return
             else:
                 logging.info(
