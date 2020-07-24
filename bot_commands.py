@@ -86,7 +86,7 @@ class Command(object):
         tokens = self.config.tokens
         rooms = self.config.rooms
         group = self.config.community
-        filename = "tokens.csv"
+        filename = self.config.tokens_path
         if ticket_type == "presenter":
             lock = _presenter_token_lock
             tokens = self.config.presenter_tokens

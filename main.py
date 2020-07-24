@@ -29,7 +29,7 @@ async def main():
     if len(sys.argv) > 1:
         config_filepath = sys.argv[1]
     else:
-        config_filepath = "config.yaml"
+        config_filepath = "data/config.yaml"
     config = Config(config_filepath)
 
     # Configure the database

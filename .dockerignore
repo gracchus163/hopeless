@@ -6,16 +6,9 @@ env/
 env3/
 .env/
 
-# Bot local files
-*.db
-
 # Python
 __pycache__/
 *.pyc
-
-# Config file
-config.yaml
-*.csv
 
 # Data files
 data/

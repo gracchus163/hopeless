@@ -104,27 +104,27 @@ class Config(object):
         with open(self.rooms_path, "r") as f:
             self.rooms = f.read().splitlines()
         try:
-            with open("volunteers.csv", "r") as f:
+            with open("data/volunteers.csv", "r") as f:
                 reader = csv.reader(f)
                 self.volunteer_tokens = dict(reader)
         except FileNotFoundError:
             logger.error("No volunteers.csv")
             self.volunteer_tokens = {}
         try:
-            with open("volunteer_rooms.csv", "r") as f:
+            with open("data/volunteer_rooms.csv", "r") as f:
                 self.volunteer_rooms = f.read().splitlines()
         except FileNotFoundError:
             logger.error("No volunteer_rooms.csv")
             self.volunteer_rooms = []
         try:
-            with open("presenters.csv", "r") as f:
+            with open("data/presenters.csv", "r") as f:
                 reader = csv.reader(f)
                 self.presenter_tokens = dict(reader)
         except FileNotFoundError:
             logger.error("No presenters.csv")
             self.presenter_tokens = {}
         try:
-            with open("presenter_rooms.csv", "r") as f:
+            with open("data/presenter_rooms.csv", "r") as f:
                 self.presenter_rooms = f.read().splitlines()
         except FileNotFoundError:
             logger.error("No presenter_rooms.csv")
