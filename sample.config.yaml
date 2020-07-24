@@ -31,6 +31,7 @@ logging:
   # Logging level
   # Allowed levels are 'INFO', 'WARNING', 'ERROR', 'DEBUG' where DEBUG is most verbose
   level: INFO
+  peewee_level: INFO
   # Configure logging to a file
   file_logging:
     # Whether logging to a file is enabled

@@ -1,11 +1,13 @@
-from chat_functions import send_text_to_room
+# coding=utf-8
+
 import logging
+
+from chat_functions import send_text_to_room
 
 logger = logging.getLogger(__name__)
 
 
 class Message(object):
-
     def __init__(self, client, store, config, message_content, room, event):
         """Initialize a new Message
 
@@ -38,4 +40,3 @@ class Message(object):
         """Say hello"""
         text = "Hello, world!"
         await send_text_to_room(self.client, self.room.room_id, text)
-

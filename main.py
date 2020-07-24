@@ -1,23 +1,22 @@
 #!/usr/bin/env python3
+# coding=utf-8
 
-import logging
 import asyncio
+import logging
 import sys
 from time import sleep
+
+from aiohttp import ClientConnectionError, ServerDisconnectedError
+from callbacks import Callbacks
+from config import Config
 from nio import (
     AsyncClient,
     AsyncClientConfig,
-    RoomMessageText,
     InviteMemberEvent,
-    LoginError,
     LocalProtocolError,
+    LoginError,
+    RoomMessageText,
 )
-from aiohttp import (
-    ServerDisconnectedError,
-    ClientConnectionError
-)
-from callbacks import Callbacks
-from config import Config
 from storage import Storage
 
 logger = logging.getLogger(__name__)
@@ -64,13 +63,12 @@ async def main():
             # Try to login with the configured username/password
             try:
                 login_response = await client.login(
-                    password=config.user_password,
-                    device_name=config.device_name,
+                    password=config.user_password, device_name=config.device_name,
                 )
 
                 # Check if login failed
                 if type(login_response) == LoginError:
-                    logger.error(f"Failed to login: %s", login_response.message)
+                    logger.error("Failed to login: %s", login_response.message)
                     return False
             except LocalProtocolError as e:
                 # There's an edge case here where the user hasn't installed the correct C
@@ -78,7 +76,8 @@ async def main():
                 logger.fatal(
                     "Failed to login. Have you installed the correct dependencies? "
                     "https://github.com/poljar/matrix-nio#installation "
-                    "Error: %s", e
+                    "Error: %s",
+                    e,
                 )
                 return False
 
@@ -100,5 +99,6 @@ async def main():
         finally:
             # Make sure to close the client connection on disconnect
             await client.close()
+
 
 asyncio.get_event_loop().run_until_complete(main())

@@ -1,0 +1,8 @@
+[flake8]
+max-line-length = 99
+import-order-style = google
+exclude =
+    env/*
+    venv/*
+accept-encodings = utf-8
+ignore = E203
