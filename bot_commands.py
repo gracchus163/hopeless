@@ -65,10 +65,15 @@ class Command(object):
     async def _process_request(self, ticket_type):
         """!h $ticket_type $token"""
         if not self.args:
-            response = "You need to add your token after {}".format(self.command)
+            response = (
+                "Add the ticket code from your email after the command, like this:  \n"
+                f"`{self.command} a1b2c3d4e5...`"
+            )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        logging.debug("ticket cmd from %s: %r", self.event.sender, self.args)
+        logging.debug(
+            "ticket cmd from %s for %s: %r", self.event.sender, ticket_type, self.args
+        )
         token = str(self.args[0])
         if len(token) != 64:
             response = (
@@ -110,7 +115,7 @@ class Command(object):
                     await send_text_to_room(
                         self.client,
                         self.room.room_id,
-                        "Inviting you to the HOPE community...",
+                        f"Inviting you to the HOPE {ticket_type} community...",
                     )
                     await community_invite(self.client, group, self.event.sender)
                     tokens[h] = self.event.sender
@@ -137,7 +142,6 @@ class Command(object):
         await community_invite(
             self.client, self.config.volunteer_community, self.event.sender
         )
-        return
 
     async def _show_help(self):
         """Show the help text"""
@@ -145,16 +149,14 @@ class Command(object):
             text = (
                 "Hello, I'm the HOPE CoreBot! To be invited to the official "
                 "conference channels message me with `ticket <your-token-here>`. "
-                "You can see more information (important for presenters) "
-                "at https://wiki.hope.net/index.php?title=Conference_bot"
+                "You can find more information (important for presenters) on the "
+                "[conference bot wiki](https://wiki.hope.net/index.php?title=Conference_bot)."
             )
             await send_text_to_room(self.client, self.room.room_id, text)
-            return
 
     async def _the_planet(self):
         text = "HACK THE PLANET https://youtu.be/YV78vobCyIo?t=55"
         await send_text_to_room(self.client, self.room.room_id, text)
-        return
 
     async def _trashing(self):
         text = """They\'re TRASHING our rights, man! They\'re
@@ -162,7 +164,6 @@ class Command(object):
         TRASHING! TRASHING! HACK THE PLANET! HACK
         THE PLANET!"""
         await send_text_to_room(self.client, self.room.room_id, text)
-        return
 
     async def _group(self):
         await send_text_to_room(self.client, self.room.room_id, "inviting to group")
@@ -192,8 +193,8 @@ class Command(object):
             return
         room_id = resp.room_id
         await send_text_to_room(self.client, room_id, msg)
-        return
+        await send_text_to_room(self.client, self.room.room_id, "Sent")
 
     async def _invite(self):
         # invite user to set of rooms
-        return
+        pass
