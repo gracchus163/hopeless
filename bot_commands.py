@@ -71,9 +71,7 @@ class Command(object):
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        logging.debug(
-            "ticket cmd from %s for %s: %r", self.event.sender, ticket_type, self.args
-        )
+        logging.debug("ticket cmd from %s for %s", self.event.sender, ticket_type)
         token = str(self.args[0])
         if len(token) != 64:
             response = (
@@ -121,12 +119,19 @@ class Command(object):
                             f.write("%s,%s\n" % (key, tokens[key]))
                 return
             else:
-                response = (
-                    "This is not a valid token, check your ticket again or "
-                    "email helpdesk2020@helpdesk.hope.net"
+                logging.info(
+                    "ticket invalid: %s: %s %s (%s)",
+                    self.event.sender,
+                    ticket_type,
+                    token,
+                    tokens.get(h, "<invalid>"),
                 )
-                await send_text_to_room(self.client, self.room.room_id, response)
-                return
+                # notify outside lock block
+        response = (
+            "This is not a valid token, check your ticket again or "
+            "email helpdesk2020@helpdesk.hope.net"
+        )
+        await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _volunteer_request(self):
         response = "Inviting you to the HOPE volunteer rooms..."

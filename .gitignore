@@ -17,12 +17,7 @@ __pycache__/
 
 # Config file
 config.yaml
-tokens.csv
-rooms.csv
-volunteers.csv
-volunteer_rooms.csv
-presenters.csv
-presenter_rooms.csv
+*.csv
 
 # Data files
 store/

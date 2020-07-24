@@ -1,8 +1,11 @@
 # coding=utf-8
 
 from hashlib import sha256
+import logging
 
 from nio import Api
+
+logger = logging.getLogger(__name__)
 
 
 def valid_token(token, tokens, sender):
@@ -14,7 +17,7 @@ def valid_token(token, tokens, sender):
             return True, msg
         elif tokens[msg] == sender:
             return True, msg
-    return False, ""
+    return False, msg
 
 
 async def community_invite(client, group, sender):  #
@@ -24,7 +27,7 @@ async def community_invite(client, group, sender):  #
     data = {"user_id": sender}
     query_parameters = {"access_token": client.access_token}
     path = Api._build_path(path, query_parameters)
-    print(path)
+    logging.debug("community_invite path: %r", path)
     await client.send(
         "PUT", path, Api.to_json(data), headers={"Content-Type": "application/json"}
     )
@@ -33,17 +36,17 @@ async def community_invite(client, group, sender):  #
 
 def is_admin(user):
     user = str(user)
-    print(user)
+    logging.debug("is_admin? %s", user)
     try:
         f = open("admin.csv", "rt")
         for nick in f.readlines():
-            print(nick)
+            logging.debug("is_admin line: %s", nick)
             if user == nick.rstrip():
                 f.close()
                 return True
         f.close()
     except FileNotFoundError:
-        print("no admin.csv")
+        logging.error("No admin.csv")
     return False
 
 

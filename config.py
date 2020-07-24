@@ -34,6 +34,9 @@ class Config(object):
         log_level = self._get_cfg(["logging", "level"], default="INFO")
         logger.setLevel(log_level)
 
+        peewee_log_level = self._get_cfg(["logging", "peewee_level"], default="INFO")
+        logging.getLogger("peewee").setLevel(peewee_log_level)
+
         file_logging_enabled = self._get_cfg(
             ["logging", "file_logging", "enabled"], default=False
         )
@@ -103,14 +106,14 @@ class Config(object):
             self.volunteer_tokens = dict(reader)
             f.close()
         except FileNotFoundError:
-            print("No volunteers.csv")
+            logger.error("No volunteers.csv")
             self.volunteer_tokens = []
         try:
             f = open("volunteer_rooms.csv", "rt")
             self.volunteer_rooms = f.read().splitlines()
             f.close()
         except FileNotFoundError:
-            print("No volunteer_rooms.csv")
+            logger.error("No volunteer_rooms.csv")
             self.volunteer_rooms = []
         try:
             f = open("presenters.csv", "rt")
@@ -118,14 +121,14 @@ class Config(object):
             self.presenter_tokens = dict(reader)
             f.close()
         except FileNotFoundError:
-            print("No presenters.csv")
+            logger.error("No presenters.csv")
             self.presenter_tokens = []
         try:
             f = open("presenter_rooms.csv", "rt")
             self.presenter_rooms = f.read().splitlines()
             f.close()
         except FileNotFoundError:
-            print("No presenter_rooms.csv")
+            logger.error("No presenter_rooms.csv")
             self.presenter_rooms = []
 
     def _get_cfg(
