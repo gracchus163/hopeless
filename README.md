@@ -4,12 +4,13 @@ Users message the bot with their ticket token which is validated and they get in
 ## Running
 To build with docker: run `docker build -f docker/Dockerfile -t hopeless:latest .` in the repo root dir.
 
-git clone and copy sample.config.yaml to config.yaml and fill in the user and server details
-rooms.csv holds a newline separated list of the room ids (no commas)
-tokens.csv holds 64 char tokens followed by whether they are 'used' or 'unused'
+git clone and copy sample.config.yaml to data/config.yaml and fill in the user and server details.
+Also in data/, rooms.csv holds a newline separated list of the room ids (no commas)
+tokens.csv holds hashes of 64 char tokens followed by either "unused" or the
+user's name
 
 Running with docker:
-`docker run -v $(pwd)/config.yaml:/config.yaml hopeless:latest`
+`docker run -v $(pwd)/data:/data hopeless:latest`
 
 Running:
 
@@ -20,9 +21,7 @@ Running:
 * "welcome-bot" functionality
 
 ## Project structure
-My main changes are in bot_commands.py: def _process_request(self)  
-	bot_actions.py  
-	config.py:67-84  
+
 ### `main.py`
 
 Initialises the config file, the bot store, and nio's AsyncClient (which is

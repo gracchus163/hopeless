@@ -98,38 +98,34 @@ class Config(object):
         self.presenter_community = self._get_cfg(
             ["presenter_community"], required=False
         )
-        with open(self.tokens_path, "rt") as f:
+        with open(self.tokens_path, "r") as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)
-        with open(self.rooms_path, "rt") as f:
+        with open(self.rooms_path, "r") as f:
             self.rooms = f.read().splitlines()
         try:
-            f = open("volunteers.csv", "rt")
-            reader = csv.reader(f)
-            self.volunteer_tokens = dict(reader)
-            f.close()
+            with open("data/volunteers.csv", "r") as f:
+                reader = csv.reader(f)
+                self.volunteer_tokens = dict(reader)
         except FileNotFoundError:
             logger.error("No volunteers.csv")
-            self.volunteer_tokens = []
+            self.volunteer_tokens = {}
         try:
-            f = open("volunteer_rooms.csv", "rt")
-            self.volunteer_rooms = f.read().splitlines()
-            f.close()
+            with open("data/volunteer_rooms.csv", "r") as f:
+                self.volunteer_rooms = f.read().splitlines()
         except FileNotFoundError:
             logger.error("No volunteer_rooms.csv")
             self.volunteer_rooms = []
         try:
-            f = open("presenters.csv", "rt")
-            reader = csv.reader(f)
-            self.presenter_tokens = dict(reader)
-            f.close()
+            with open("data/presenters.csv", "r") as f:
+                reader = csv.reader(f)
+                self.presenter_tokens = dict(reader)
         except FileNotFoundError:
             logger.error("No presenters.csv")
-            self.presenter_tokens = []
+            self.presenter_tokens = {}
         try:
-            f = open("presenter_rooms.csv", "rt")
-            self.presenter_rooms = f.read().splitlines()
-            f.close()
+            with open("data/presenter_rooms.csv", "r") as f:
+                self.presenter_rooms = f.read().splitlines()
         except FileNotFoundError:
             logger.error("No presenter_rooms.csv")
             self.presenter_rooms = []
