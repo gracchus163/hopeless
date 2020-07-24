@@ -1,10 +1,13 @@
 # coding=utf-8
 
 from asyncio import Lock
+import logging
 
 from bot_actions import community_invite, is_admin, valid_token
 from chat_functions import send_text_to_room
 from nio import RoomResolveAliasResponse
+
+logger = logging.getLogger(__name__)
 
 _attendee_token_lock = Lock()
 _presenter_token_lock = Lock()
@@ -38,6 +41,7 @@ class Command(object):
 
     async def process(self):
         """Process the command"""
+        logging.debug("Got command from %s: %r", self.event.sender, self.command)
         trigger = self.command.lower()
         if trigger.startswith("help"):
             await self._show_help()
@@ -64,8 +68,7 @@ class Command(object):
             response = "You need to add your token after {}".format(self.command)
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        print("args are:" + " ".join([str(x) for x in self.args]))
-        print("from: " + self.event.sender)
+        logging.debug("ticket cmd from %s: %r", self.event.sender, self.args)
         token = str(self.args[0])
         if len(token) != 64:
             response = (
@@ -100,7 +103,7 @@ class Command(object):
                     ticket_type
                 )
                 await send_text_to_room(self.client, self.room.room_id, response)
-                print(rooms)
+                logging.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
                 for r in rooms:
                     await self.client.room_invite(r, self.event.sender)
                 if tokens[h] == "unused":
@@ -166,7 +169,13 @@ class Command(object):
         await community_invite(self.client, self.config, self.event.sender)
 
     async def _notice(self):
-        print("notice")
+        msg = "@room " + " ".join(map(str, self.args[1:]))
+        logging.warning(
+            "notice used by %s at %s to send: %r",
+            self.event.sender,
+            self.room.room_id,
+            msg,
+        )
         if len(self.args) < 2:
             await send_text_to_room(
                 self.client,
@@ -176,11 +185,12 @@ class Command(object):
             return
         resp = await self.client.room_resolve_alias(self.args[0])
         if not isinstance(resp, RoomResolveAliasResponse):
-            print("bad room alias")
+            logging.info("notice: bad room alias %s", self.args[0])
+            await send_text_to_room(
+                self.client, self.room.room_id, "Invalid room alias"
+            )
             return
         room_id = resp.room_id
-        msg = "@room " + " ".join(map(str, self.args[1:]))
-        print("send {} to {}".format(msg, room_id))
         await send_text_to_room(self.client, room_id, msg)
         return
 
