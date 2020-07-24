@@ -104,20 +104,17 @@ class Command(object):
         async with lock:
             valid, h = valid_token(token, tokens, self.event.sender)
             if valid:
-                response = "Verified ticket. You should now be invited to the {} rooms.".format(
-                    ticket_type
+                response = (
+                    "Verified ticket. You should now be invited to the HOPE "
+                    f"{ticket_type} chat rooms and community."
                 )
                 await send_text_to_room(self.client, self.room.room_id, response)
                 logging.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
                 for r in rooms:
                     await self.client.room_invite(r, self.event.sender)
+                await community_invite(self.client, group, self.event.sender)
+
                 if tokens[h] == "unused":
-                    await send_text_to_room(
-                        self.client,
-                        self.room.room_id,
-                        f"Inviting you to the HOPE {ticket_type} community...",
-                    )
-                    await community_invite(self.client, group, self.event.sender)
                     tokens[h] = self.event.sender
                     with open(filename, "w") as f:
                         for key in tokens.keys():
