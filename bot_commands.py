@@ -1,6 +1,7 @@
 # coding=utf-8
 
 from asyncio import Lock
+import csv
 import logging
 from os import fsync, rename
 
@@ -117,8 +118,8 @@ class Command(object):
                     tokens[h] = self.event.sender
                     filename_temp = filename + ".atomic"
                     with open(filename_temp, "w") as f:
-                        for key in tokens.keys():
-                            f.write("%s,%s\n" % (key, tokens[key]))
+                        csv_writer = csv.writer(f)
+                        csv_writer.writerows(tokens.items())
                         f.flush()
                         fsync(f.fileno())
                     rename(filename_temp, filename)
