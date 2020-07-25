@@ -118,6 +118,9 @@ class Config(object):
         self.volunteer_pass = self._get_cfg(
             ["volunteer_pass"], required=False
             )
+        self.oncall_room = self._get_cfg(
+            ["oncall_room"], required=False
+            )
         with open(self.tokens_path, "rt") as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)

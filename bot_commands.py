@@ -51,7 +51,7 @@ class Command(object):
         elif trigger.startswith("ticket"):
             await self._process_request("attendee")
         elif trigger.startswith("volunteer"):
-            await self._volunteer_request()
+            await self._volunteer_request("volunteer")
             #await self._process_request("volunteer")
         elif trigger.startswith("presenter"):
             await self._process_request("presenter")
@@ -62,6 +62,15 @@ class Command(object):
         elif trigger.startswith("notice"):
             if is_admin(self.event.sender):
                 await self._notice()
+        elif trigger.startswith("oncall"):
+            await self._volunteer_request("oncall")
+        elif len(trigger) >= 63:
+            response = ( "I think you posted just your ticket code. Add the ticket code from your email after the command, like this: \n"
+                    f"ticket a1b2c3d4e5\n"
+                    f"or \n"
+                    f"presenter a1b2c3d4e5"
+                    )
+            await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _process_request(self, ticket_type):
         """!h $ticket_type $token"""
@@ -136,7 +145,7 @@ class Command(object):
         )
         await send_text_to_room(self.client, self.room.room_id, response)
 
-    async def _volunteer_request(self):
+    async def _volunteer_request(self, req_type):
         if len(self.args) != 1:
             return
         if self.args[0] != self.config.volunteer_pass:
@@ -144,16 +153,21 @@ class Command(object):
             #response = ("What are you, stoned or stupid? You don't hack a bank across state lines from your house, you'll get nailed by the FBI. Where are your brains, in your ass? Don't you know anything?")
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        response = "Inviting you to the HOPE volunteer rooms..."
-        await send_text_to_room(self.client, self.room.room_id, response)
-        for r in self.config.volunteer_rooms:
-            await self.client.room_invite(r, self.event.sender)
-        await send_text_to_room(
-            self.client, self.room.room_id, "Inviting you to the volunteer community"
-        )
-        await community_invite(
+        if req_type == "oncall":
+            response = "Inviting you to the HOPE oncall rooms"
+            await send_text_to_room(self.client, self.room.room_id, response)
+            await self.client.room_invite(self.config.oncall_room, self.event.sender)
+        else:
+            response = "Inviting you to the HOPE volunteer rooms..."
+            await send_text_to_room(self.client, self.room.room_id, response)
+            for r in self.config.volunteer_rooms:
+                await self.client.room_invite(r, self.event.sender)
+            await send_text_to_room(
+                self.client, self.room.room_id, "Inviting you to the volunteer community"
+            )
+            await community_invite(
             self.client, self.config.volunteer_community, self.event.sender
-        )
+            )
 
     async def _show_help(self):
         """Show the help text"""
@@ -209,4 +223,6 @@ class Command(object):
 
     async def _invite(self):
         # invite user to set of rooms
+        pass
+    async def _oncall(self):
         pass
