@@ -1,19 +1,12 @@
 # coding=utf-8
 
-from asyncio import Lock
-import csv
 import logging
-from os import fsync, rename
 
-from bot_actions import community_invite, is_admin, valid_token
+from bot_actions import community_invite, is_admin, sync_data, valid_token
 from chat_functions import send_text_to_room
 from nio import RoomResolveAliasResponse
 
 logger = logging.getLogger(__name__)
-
-_attendee_token_lock = Lock()
-_presenter_token_lock = Lock()
-_volunteer_token_lock = Lock()
 
 
 class Command(object):
@@ -63,6 +56,9 @@ class Command(object):
         elif trigger.startswith("notice"):
             if is_admin(self.config, self.event.sender):
                 await self._notice()
+        elif trigger.startswith("sync"):
+            if is_admin(self.config, self.event.sender):
+                await self._sync()
 
     async def _process_request(self, ticket_type):
         """!h $ticket_type $token"""
@@ -82,23 +78,20 @@ class Command(object):
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        lock = _attendee_token_lock
+        lock = self.config._attendee_token_lock
         tokens = self.config.tokens
         rooms = self.config.rooms
         group = self.config.community
-        filename = self.config.tokens_path
         if ticket_type == "presenter":
-            lock = _presenter_token_lock
+            lock = self.config._presenter_token_lock
             tokens = self.config.presenter_tokens
             rooms = self.config.presenter_rooms
             group = self.config.presenter_community
-            filename = self.config.presenter_tokens_path
         elif ticket_type == "volunteer":
-            lock = _volunteer_token_lock
+            lock = self.config._volunteer_token_lock
             tokens = self.config.volunteer_tokens
             rooms = self.config.volunteer_rooms
             group = self.config.volunteer_community
-            filename = self.config.volunteer_tokens_path
 
         # Make sure other tasks don't interfere with our token[] manipulation or writing
         async with lock:
@@ -125,13 +118,6 @@ class Command(object):
 
                 if tokens[h] == "unused":
                     tokens[h] = self.event.sender
-                    filename_temp = filename + ".atomic"
-                    with open(filename_temp, "w") as f:
-                        csv_writer = csv.writer(f)
-                        csv_writer.writerows(tokens.items())
-                        f.flush()
-                        fsync(f.fileno())
-                    rename(filename_temp, filename)
 
                 return
             else:
@@ -214,6 +200,11 @@ class Command(object):
         room_id = resp.room_id
         await send_text_to_room(self.client, room_id, msg)
         await send_text_to_room(self.client, self.room.room_id, "Sent")
+
+    async def _sync(self):
+        logging.warning("sync used by %s", self.event.sender)
+        await sync_data(self.config)
+        await send_text_to_room(self.client, self.room.room_id, "Sunk")
 
     async def _invite(self):
         # invite user to set of rooms

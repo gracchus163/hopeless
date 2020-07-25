@@ -1,5 +1,6 @@
 # coding=utf-8
 
+from asyncio import Lock
 import csv
 import logging
 import os
@@ -149,6 +150,14 @@ class Config(object):
         except FileNotFoundError:
             logger.error("No presenter_rooms csv")
             self.presenter_rooms = []
+
+        self.sync_interval = int(
+            self._get_cfg(["sync_interval"], default=30, required=False,)
+        )
+
+        self._attendee_token_lock = Lock()
+        self._presenter_token_lock = Lock()
+        self._volunteer_token_lock = Lock()
 
     def _get_cfg(
         self, path: List[str], default: Any = None, required: bool = True,
