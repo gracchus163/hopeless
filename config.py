@@ -98,6 +98,9 @@ class Config(object):
         self.presenter_community = self._get_cfg(
             ["presenter_community"], required=False
         )
+        self.volunteer_pass = self._get_cfg(
+            ["volunteer_pass"], required=False
+        )
         with open(self.tokens_path, "rt") as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)

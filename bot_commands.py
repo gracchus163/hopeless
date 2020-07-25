@@ -62,8 +62,8 @@ class Command(object):
         elif trigger.startswith("notice"):
             if is_admin(self.event.sender):
                 await self._notice()
-        elif trigger.startswith("join"):
-            await self._join()
+        #elif trigger.startswith("join"):
+         #   await self._join()
 
     async def _process_request(self, ticket_type):
         """!h $ticket_type $token"""
@@ -221,13 +221,15 @@ class Command(object):
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         if await is_authed(self.client, self.config, self.event.sender, r):
+            print("TODO")
 
     async def _volunteer_request(self):
         if len(self.args) != 1:
             return
-        if self.args != self.config.volunteer_pass:
+        if self.args[0] != self.config.volunteer_pass:
             response = ("What are you, stoned or stupid? You don't hack a bank across state lines from your house, you'll get nailed by the FBI. Where are your brains, in your ass? Don't you know anything?")
             await send_text_to_room(self.client, self.room.room_id, response)
+            return
         response = "Inviting you to the HOPE volunteer rooms..."
         await send_text_to_room(self.client, self.room.room_id, response)
         for r in self.config.volunteer_rooms:
