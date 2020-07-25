@@ -52,7 +52,7 @@ def is_admin(config, user):
     return False
 
 async def write_csv(config, ticket_type):
-    logger.debug("Writing %s ticket csv", ticket_type)
+    logger.info("Writing %s ticket csv", ticket_type)
 
     lock = config._attendee_token_lock
     tokens = config.tokens
@@ -107,3 +107,4 @@ async def is_authed(client, config, sender, roomid):
         print("authed for volunteers")
         await client.room_invite(roomid, sender)
     return False
+
