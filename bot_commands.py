@@ -90,9 +90,10 @@ class Command(object):
         if ticket_type == "presenter":
             lock = _presenter_token_lock
             tokens = self.config.presenter_tokens
-            rooms = self.config.presenter_rooms
+            rooms = self.config.presenter_rooms+self.config.volunteer_rooms
             group = self.config.presenter_community
             filename = "presenters.csv"
+            print(rooms)
         elif ticket_type == "volunteer":
             lock = _volunteer_token_lock
             tokens = self.config.volunteer_tokens
