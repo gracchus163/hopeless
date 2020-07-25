@@ -92,17 +92,24 @@ class Command(object):
                 self.room.room_id,
                 "Hi there, I'm a bot. Try typing `help` if you need some guidance",
             )
-        elif len(trigger) >= 63 and " " not in trigger:
-            response = (
-                "I think you posted just your ticket code. Add the ticket "
-                "code from your email after the command, like this:  \n"
-                "`ticket a1b2c3d4e5...`  \n"
-                "or  \n"
-                "`presenter a1b2c3d4e5...`"
-            )
-            await send_text_to_room(self.client, self.room.room_id, response)
+        else:
+            await self._process_any_ticket()
 
-    async def _process_request(self, ticket_type):
+    async def _process_any_ticket(self):
+        if len(self.command) != 64:
+            return
+        success = False
+        for ticket_type in ("attendee", "presenter", "volunteer"):
+            self.args = [self.command]
+            # Don't break, in case they're in as both attendeee+presenter
+            success |= await self._process_request(ticket_type, fail_quiet=True)
+        if not success:
+            logging.info(
+                "ticket invalid: %s: (any) %s", self.event.sender, self.command,
+            )
+            await self._send_failed_ticket()
+
+    async def _process_request(self, ticket_type, fail_quiet=False) -> bool:
         """!h $ticket_type $token"""
         if not self.args:
             response = (
@@ -110,7 +117,7 @@ class Command(object):
                 f"`{self.command} a1b2c3d4e5...`"
             )
             await send_text_to_room(self.client, self.room.room_id, response)
-            return
+            return False
         logger.debug("ticket cmd from %s for %s", self.event.sender, ticket_type)
         token = str(self.args[0])
         if len(token) != 64:
@@ -119,7 +126,7 @@ class Command(object):
                 "have trouble, please send an email to helpdesk2020@helpdesk.hope.net"
             )
             await send_text_to_room(self.client, self.room.room_id, response)
-            return
+            return False
         lock = self.config._attendee_token_lock
         tokens = self.config.tokens
         rooms = self.config.rooms
@@ -140,8 +147,8 @@ class Command(object):
             valid, h = valid_token(token, tokens, self.event.sender)
             if valid:
                 response = (
-                    "Verified ticket. You should now be invited to the HOPE "
-                    f"{ticket_type} chat rooms and community."
+                    "Verified ticket. You should now be invited to the **HOPE "
+                    f"{ticket_type}** chat rooms."
                 )
                 await send_text_to_room(self.client, self.room.room_id, response)
                 logger.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
@@ -151,16 +158,22 @@ class Command(object):
 
                 if tokens[h] == "unused":
                     tokens[h] = self.event.sender
-                return
+                return True
             else:
-                logger.info(
-                    "ticket invalid: %s: %s %s (%s)",
-                    self.event.sender,
-                    ticket_type,
-                    token,
-                    tokens.get(h, "<invalid>"),
-                )
+                if not fail_quiet:
+                    logger.info(
+                        "ticket invalid: %s: %s %s (%s)",
+                        self.event.sender,
+                        ticket_type,
+                        token,
+                        tokens.get(h, "<invalid>"),
+                    )
                 # notify outside lock block
+        if not fail_quiet:
+            await self._send_failed_ticket()
+        return False
+
+    async def _send_failed_ticket(self):
         response = (
             "This is not a valid token, check your ticket again or "
             "email helpdesk2020@helpdesk.hope.net  \n"
