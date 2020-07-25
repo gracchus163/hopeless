@@ -2,9 +2,9 @@
 
 import logging
 
-from bot_actions import community_invite, is_admin, sync_data, valid_token
+from bot_actions import community_invite, is_admin, valid_token, get_roomid, is_authed, sync_data
+
 from chat_functions import send_text_to_room
-from nio import RoomResolveAliasResponse
 
 logger = logging.getLogger(__name__)
 
@@ -45,8 +45,8 @@ class Command(object):
         elif trigger.startswith("ticket"):
             await self._process_request("attendee")
         elif trigger.startswith("volunteer"):
-            # await self._volunteer_request()
-            await self._process_request("volunteer")
+            await self._volunteer_request()
+            #await self._process_request("volunteer")
         elif trigger.startswith("presenter"):
             await self._process_request("presenter")
         elif trigger.startswith("hack"):
@@ -59,6 +59,10 @@ class Command(object):
         elif trigger.startswith("sync"):
             if is_admin(self.config, self.event.sender):
                 await self._sync()
+
+        #elif trigger.startswith("join"):
+         #   await self._join()
+
 
     async def _process_request(self, ticket_type):
         """!h $ticket_type $token"""
@@ -85,7 +89,7 @@ class Command(object):
         if ticket_type == "presenter":
             lock = self.config._presenter_token_lock
             tokens = self.config.presenter_tokens
-            rooms = self.config.presenter_rooms
+            rooms = self.config.presenter_rooms+self.config.volunteer_rooms
             group = self.config.presenter_community
         elif ticket_type == "volunteer":
             lock = self.config._volunteer_token_lock
@@ -137,18 +141,6 @@ class Command(object):
         )
         await send_text_to_room(self.client, self.room.room_id, response)
 
-    async def _volunteer_request(self):
-        response = "Inviting you to the HOPE volunteer rooms..."
-        await send_text_to_room(self.client, self.room.room_id, response)
-        for r in self.config.volunteer_rooms:
-            await self.client.room_invite(r, self.event.sender)
-        await send_text_to_room(
-            self.client, self.room.room_id, "Inviting you to the HOPE community"
-        )
-        await community_invite(
-            self.client, self.config.volunteer_community, self.event.sender
-        )
-
     async def _show_help(self):
         """Show the help text"""
         if not self.args:
@@ -190,14 +182,11 @@ class Command(object):
                 "notice args: <room-alias\\> <strings\\>,,,",
             )
             return
-        resp = await self.client.room_resolve_alias(self.args[0])
-        if not isinstance(resp, RoomResolveAliasResponse):
-            logging.info("notice: bad room alias %s", self.args[0])
-            await send_text_to_room(
-                self.client, self.room.room_id, "Invalid room alias"
-            )
+        ret, room_id = get_roomid(self.client, self.args[0])
+        if not ret:
+            response = ("Could not find a roomid for that room name")
+            await send_text_to_room(self.client, self.room.room_id, response)
             return
-        room_id = resp.room_id
         await send_text_to_room(self.client, room_id, msg)
         await send_text_to_room(self.client, self.room.room_id, "Sent")
 
@@ -207,5 +196,41 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, "Sunk")
 
     async def _invite(self):
-        # invite user to set of rooms
+        # TODO manually invite user to set of rooms
         pass
+
+    async def _join(self):
+        # user can be invited to rooms they are authorised for
+        if len(self.args) != 1:
+            response = (
+                "Add the fully qualified roomname after join like this:  \n"
+                f"`join #oncall:hope.net`"
+            )
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        ret, r = await get_roomid(self.client, self.args[0])
+        if not ret:
+            response = ("Could not find a roomid for that room name")
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        if await is_authed(self.client, self.config, self.event.sender, r):
+            print("TODO")
+
+    async def _volunteer_request(self):
+        if len(self.args) != 1:
+            return
+        if self.args[0] != self.config.volunteer_pass:
+            response = ("What are you, stoned or stupid? You don't hack a bank across state lines from your house, you'll get nailed by the FBI. Where are your brains, in your ass? Don't you know anything?")
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        response = "Inviting you to the HOPE volunteer rooms..."
+        await send_text_to_room(self.client, self.room.room_id, response)
+        for r in self.config.volunteer_rooms:
+            await self.client.room_invite(r, self.event.sender)
+        await send_text_to_room(
+            self.client, self.room.room_id, "Inviting you to the volunteer community"
+        )
+        await community_invite(
+            self.client, self.config.volunteer_community, self.event.sender
+        )
+        await self.client.room_invite(r, self.event.sender)

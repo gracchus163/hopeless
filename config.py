@@ -115,6 +115,9 @@ class Config(object):
         self.presenter_community = self._get_cfg(
             ["presenter_community"], required=False
         )
+        self.volunteer_pass = self._get_cfg(
+            ["volunteer_pass"], required=False
+        )
         self.admin_csv_path = self._get_cfg(
             ["admin_csv"], default="data/admin.csv", required=False,
         )
