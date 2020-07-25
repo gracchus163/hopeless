@@ -21,10 +21,10 @@ matrix:
 
 storage:
   # The path to the database
-  database_filepath: "bot.db"
+  database_filepath: "data/bot.db"
   # The path to a directory for internal bot storage
   # containing encryption keys, sync tokens, etc.
-  store_filepath: "./store"
+  store_filepath: "data/store"
 
 # Logging setup
 logging:
@@ -45,8 +45,8 @@ logging:
 
 repeat_community_invite: false
 
-rooms_path: "rooms.csv"
-tokens_path: "tokens.csv"
+rooms_path: "data/rooms.csv"
+tokens_path: "data/tokens.csv"
 community: "+name:server.net"
 volunteer_community: "+name:server.net"
 presenter_community: "+name:server.net"

@@ -60,7 +60,7 @@ class Command(object):
         elif trigger.startswith("trashing"):
             await self._trashing()
         elif trigger.startswith("notice"):
-            if is_admin(self.event.sender):
+            if is_admin(self.config, self.event.sender):
                 await self._notice()
         #elif trigger.startswith("join"):
          #   await self._join()
@@ -87,20 +87,19 @@ class Command(object):
         tokens = self.config.tokens
         rooms = self.config.rooms
         group = self.config.community
-        filename = "tokens.csv"
+        filename = self.config.tokens_path
         if ticket_type == "presenter":
             lock = _presenter_token_lock
             tokens = self.config.presenter_tokens
             rooms = self.config.presenter_rooms+self.config.volunteer_rooms
             group = self.config.presenter_community
-            filename = "presenters.csv"
-            print(rooms)
+            filename = self.config.presenter_tokens_path
         elif ticket_type == "volunteer":
             lock = _volunteer_token_lock
             tokens = self.config.volunteer_tokens
             rooms = self.config.volunteer_rooms
             group = self.config.volunteer_community
-            filename = "volunteers.csv"
+            filename = self.config.volunteer_tokens_path
 
         # Make sure other tasks don't interfere with our token[] manipulation or writing
         async with lock:
