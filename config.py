@@ -152,7 +152,7 @@ class Config(object):
             self.presenter_rooms = []
 
         self.sync_interval = int(
-            self._get_cfg(["sync_interval"], default=30, required=False,)
+            self._get_cfg(["sync_interval"], default=300, required=False,)
         )
 
         self._attendee_token_lock = Lock()
