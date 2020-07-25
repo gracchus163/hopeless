@@ -45,7 +45,7 @@ class Command(object):
         elif trigger.startswith("ticket"):
             await self._process_request("attendee")
         elif trigger.startswith("volunteer"):
-            await self._volunteer_request()
+            await self._volunteer_request("volunteer")
             #await self._process_request("volunteer")
         elif trigger.startswith("presenter"):
             await self._process_request("presenter")
@@ -59,10 +59,15 @@ class Command(object):
         elif trigger.startswith("sync"):
             if is_admin(self.config, self.event.sender):
                 await self._sync()
-
-        #elif trigger.startswith("join"):
-         #   await self._join()
-
+        elif trigger.startswith("oncall"):
+            await self._volunteer_request("oncall")
+        elif len(trigger) >= 63:
+            response = ( "I think you posted just your ticket code. Add the ticket code from your email after the command, like this: \n"
+                    f"ticket a1b2c3d4e5\n"
+                    f"or \n"
+                    f"presenter a1b2c3d4e5"
+                    )
+            await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _process_request(self, ticket_type):
         """!h $ticket_type $token"""
@@ -89,7 +94,7 @@ class Command(object):
         if ticket_type == "presenter":
             lock = self.config._presenter_token_lock
             tokens = self.config.presenter_tokens
-            rooms = self.config.presenter_rooms+self.config.volunteer_rooms
+            rooms = self.config.presenter_rooms + self.config.rooms
             group = self.config.presenter_community
         elif ticket_type == "volunteer":
             lock = self.config._volunteer_token_lock
@@ -103,26 +108,16 @@ class Command(object):
             if valid:
                 response = (
                     "Verified ticket. You should now be invited to the HOPE "
-                    f"{ticket_type} chat rooms."
+                    f"{ticket_type} chat rooms and community."
                 )
-                if tokens[h] == "unused" and not self.config.repeat_community_invite:
-                    # Unused token, can't resend? Warn.
-                    response += (
-                        "  \nBe sure to accept the community invite, "
-                        "we can only send it once!"
-                    )
                 await send_text_to_room(self.client, self.room.room_id, response)
-
                 logging.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
                 for r in rooms:
                     await self.client.room_invite(r, self.event.sender)
-
-                if tokens[h] == "unused" or self.config.repeat_community_invite:
-                    await community_invite(self.client, group, self.event.sender)
+                await community_invite(self.client, group, self.event.sender)
 
                 if tokens[h] == "unused":
                     tokens[h] = self.event.sender
-
                 return
             else:
                 logging.info(
@@ -140,6 +135,30 @@ class Command(object):
             "instead of `ticket`"
         )
         await send_text_to_room(self.client, self.room.room_id, response)
+
+    async def _volunteer_request(self, req_type):
+        if len(self.args) != 1:
+            return
+        if self.args[0] != self.config.volunteer_pass:
+            response = ("Sorry, wrong password, try again?")
+            #response = ("What are you, stoned or stupid? You don't hack a bank across state lines from your house, you'll get nailed by the FBI. Where are your brains, in your ass? Don't you know anything?")
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        if req_type == "oncall":
+            response = "Inviting you to the HOPE oncall rooms"
+            await send_text_to_room(self.client, self.room.room_id, response)
+            await self.client.room_invite(self.config.oncall_room, self.event.sender)
+        else:
+            response = "Inviting you to the HOPE volunteer rooms..."
+            await send_text_to_room(self.client, self.room.room_id, response)
+            for r in self.config.volunteer_rooms:
+                await self.client.room_invite(r, self.event.sender)
+            await send_text_to_room(
+                self.client, self.room.room_id, "Inviting you to the volunteer community"
+            )
+            await community_invite(
+            self.client, self.config.volunteer_community, self.event.sender
+            )
 
     async def _show_help(self):
         """Show the help text"""
@@ -215,22 +234,3 @@ class Command(object):
             return
         if await is_authed(self.client, self.config, self.event.sender, r):
             print("TODO")
-
-    async def _volunteer_request(self):
-        if len(self.args) != 1:
-            return
-        if self.args[0] != self.config.volunteer_pass:
-            response = ("What are you, stoned or stupid? You don't hack a bank across state lines from your house, you'll get nailed by the FBI. Where are your brains, in your ass? Don't you know anything?")
-            await send_text_to_room(self.client, self.room.room_id, response)
-            return
-        response = "Inviting you to the HOPE volunteer rooms..."
-        await send_text_to_room(self.client, self.room.room_id, response)
-        for r in self.config.volunteer_rooms:
-            await self.client.room_invite(r, self.event.sender)
-        await send_text_to_room(
-            self.client, self.room.room_id, "Inviting you to the volunteer community"
-        )
-        await community_invite(
-            self.client, self.config.volunteer_community, self.event.sender
-        )
-        await self.client.room_invite(r, self.event.sender)
