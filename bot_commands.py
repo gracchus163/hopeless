@@ -3,7 +3,6 @@
 from asyncio import Lock
 import csv
 import logging
-from os import fsync, rename
 
 from bot_actions import community_invite, is_admin, valid_token
 from chat_functions import send_text_to_room
@@ -90,7 +89,7 @@ class Command(object):
         if ticket_type == "presenter":
             lock = _presenter_token_lock
             tokens = self.config.presenter_tokens
-            rooms = self.config.presenter_rooms
+            rooms = self.config.presenter_rooms + self.config.rooms
             group = self.config.presenter_community
             filename = "presenters.csv"
         elif ticket_type == "volunteer":
@@ -116,14 +115,9 @@ class Command(object):
 
                 if tokens[h] == "unused":
                     tokens[h] = self.event.sender
-                    filename_temp = filename + ".atomic"
-                    with open(filename_temp, "w") as f:
-                        csv_writer = csv.writer(f)
-                        csv_writer.writerows(tokens.items())
-                        f.flush()
-                        fsync(f.fileno())
-                    rename(filename_temp, filename)
-
+                    with open(filename, "w") as f:
+                        for key in tokens.keys():
+                            f.write("%s,%s\n" % (key, tokens[key]))
                 return
             else:
                 logging.info(
