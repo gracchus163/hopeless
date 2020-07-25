@@ -3,7 +3,7 @@
 from hashlib import sha256
 import logging
 
-from nio import Api
+from nio import Api,RoomResolveAliasResponse
 
 logger = logging.getLogger(__name__)
 
@@ -50,5 +50,22 @@ def is_admin(user):
     return False
 
 
-def get_alias(roomid):
-    return roomid
+async def get_roomid(client, alias):
+    resp = await client.room_resolve_alias(alias)
+    print(resp)
+    if not isinstance(resp, RoomResolveAliasResponse):
+        logging.info("notice: bad room alias %s", alias)
+        return False, ""
+    return True, resp.room_id
+
+async def is_authed(client, config, sender, roomid):
+#  GET /groups/<group_id>/users
+#    path = "groups/{}/rooms".format("+hopeless:hope.net")
+#    query_parameters = {"access_token": client.access_token} 
+#    path = Api._build_path(path, query_parameters)
+#    resp = await client._send("GET", path )
+#    print(resp)
+    if sender in config.volunteer_tokens.values():
+        print("authed for volunteers")
+        await client.room_invite(roomid, sender)
+    return False
