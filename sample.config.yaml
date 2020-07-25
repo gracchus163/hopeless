@@ -45,6 +45,8 @@ logging:
 
 repeat_community_invite: false
 
+sync_interval: 30
+
 rooms_path: "data/rooms.csv"
 tokens_path: "data/tokens.csv"
 community: "+name:server.net"

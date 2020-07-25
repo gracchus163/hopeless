@@ -3,10 +3,12 @@
 
 import asyncio
 import logging
+from signal import SIGINT, SIGTERM
 import sys
 from time import sleep
 
 from aiohttp import ClientConnectionError, ServerDisconnectedError
+from bot_actions import periodic_sync, sync_data
 from callbacks import Callbacks
 from config import Config
 from nio import (
@@ -20,6 +22,18 @@ from nio import (
 from storage import Storage
 
 logger = logging.getLogger(__name__)
+
+
+async def shutdown(loop, client, config, signal=None):
+    if getattr(config, "stopping", False):
+        return
+    config.stopping = True
+    logging.info("Shutting down for %s", signal.name if signal else "command")
+    await client.close()
+    config.sync_task.cancel()
+    await sync_data(config)
+    loop.stop()
+    logging.info("Goodbye")
 
 
 async def main():
@@ -52,13 +66,25 @@ async def main():
         config=client_config,
     )
 
+    # Signal handlers
+    loop = asyncio.get_event_loop()
+    for sig in (SIGINT, SIGTERM):
+        loop.add_signal_handler(
+            sig,
+            lambda sig=sig: asyncio.create_task(shutdown(loop, client, config, sig)),
+        )
+
     # Set up event callbacks
     callbacks = Callbacks(client, store, config)
     client.add_event_callback(callbacks.message, (RoomMessageText,))
     client.add_event_callback(callbacks.invite, (InviteMemberEvent,))
 
+    # Periodic token save
+    config.sync_task = asyncio.create_task(periodic_sync(config))
+
     # Keep trying to reconnect on failure (with some time in-between)
     while True:
+        logging.debug("Starting client")
         try:
             # Try to login with the configured username/password
             try:

@@ -1,7 +1,10 @@
 # coding=utf-8
 
+from asyncio import sleep
+import csv
 from hashlib import sha256
 import logging
+from os import fsync, rename
 
 from nio import Api,RoomResolveAliasResponse
 
@@ -20,7 +23,7 @@ def valid_token(token, tokens, sender):
     return False, msg
 
 
-async def community_invite(client, group, sender):  #
+async def community_invite(client, group, sender):
     if not group:
         return
     path = "groups/{}/admin/users/invite/{}".format(group, sender)
@@ -48,6 +51,42 @@ def is_admin(config, user):
         logging.error("No admin csv")
     return False
 
+async def write_csv(config, ticket_type):
+    logger.debug("Writing %s ticket csv", ticket_type)
+
+    lock = config._attendee_token_lock
+    tokens = config.tokens
+    filename = config.tokens_path
+    if ticket_type == "presenter":
+        lock = config._presenter_token_lock
+        tokens = config.presenter_tokens
+        filename = config.presenter_tokens_path
+    elif ticket_type == "volunteer":
+        lock = config._volunteer_token_lock
+        tokens = config.volunteer_tokens
+        filename = config.volunteer_tokens_path
+
+    async with lock:
+        filename_temp = filename + ".atomic"
+        with open(filename_temp, "w") as f:
+            csv_writer = csv.writer(f)
+            csv_writer.writerows(tokens.items())
+            f.flush()
+            fsync(f.fileno())
+        rename(filename_temp, filename)
+
+    logger.debug("Done writing")
+
+
+async def sync_data(config):
+    for ticket_type in ["attendee", "volunteer", "presenter"]:
+        await write_csv(config, ticket_type)
+
+
+async def periodic_sync(config):
+    while True:
+        await sleep(config.sync_interval)
+        await sync_data(config)
 
 async def get_roomid(client, alias):
     resp = await client.room_resolve_alias(alias)
