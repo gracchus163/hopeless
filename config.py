@@ -117,8 +117,7 @@ class Config(object):
         self.volunteer_pass = self._get_cfg(
             ["volunteer_pass"], required=False
         )
-        with open(self.tokens_path, "rt") as f:
-            self.admin_csv_path = self._get_cfg(
+        self.admin_csv_path = self._get_cfg(
             ["admin_csv"], default="data/admin.csv", required=False,
         )
 
