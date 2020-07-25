@@ -51,8 +51,8 @@ class Command(object):
         elif trigger.startswith("ticket"):
             await self._process_request("attendee")
         elif trigger.startswith("volunteer"):
-            # await self._volunteer_request()
-            await self._process_request("volunteer")
+            await self._volunteer_request()
+            #await self._process_request("volunteer")
         elif trigger.startswith("presenter"):
             await self._process_request("presenter")
         elif trigger.startswith("hack"):
@@ -137,12 +137,19 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _volunteer_request(self):
+        if len(self.args) != 1:
+            return
+        if self.args[0] != self.config.volunteer_pass:
+            response = ("Sorry, wrong password, try again?")
+            #response = ("What are you, stoned or stupid? You don't hack a bank across state lines from your house, you'll get nailed by the FBI. Where are your brains, in your ass? Don't you know anything?")
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
         response = "Inviting you to the HOPE volunteer rooms..."
         await send_text_to_room(self.client, self.room.room_id, response)
         for r in self.config.volunteer_rooms:
             await self.client.room_invite(r, self.event.sender)
         await send_text_to_room(
-            self.client, self.room.room_id, "Inviting you to the HOPE community"
+            self.client, self.room.room_id, "Inviting you to the volunteer community"
         )
         await community_invite(
             self.client, self.config.volunteer_community, self.event.sender
