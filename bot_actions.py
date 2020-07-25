@@ -34,19 +34,18 @@ async def community_invite(client, group, sender):  #
     return
 
 
-def is_admin(user):
+def is_admin(config, user):
     user = str(user)
     logging.debug("is_admin? %s", user)
     try:
-        f = open("admin.csv", "rt")
-        for nick in f.readlines():
-            logging.debug("is_admin line: %s", nick)
-            if user == nick.rstrip():
-                f.close()
-                return True
-        f.close()
+        with open(config.admin_csv_path, "r") as f:
+            for nick in f.readlines():
+                logging.debug("is_admin line: %s", nick)
+                if user == nick.rstrip():
+                    f.close()
+                    return True
     except FileNotFoundError:
-        logging.error("No admin.csv")
+        logging.error("No admin csv")
     return False
 
 

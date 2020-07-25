@@ -91,6 +91,22 @@ class Config(object):
         )
         self.rooms_path = self._get_cfg(["rooms_path"], required=True)
         self.tokens_path = self._get_cfg(["tokens_path"], required=True)
+        self.volunteer_rooms_path = self._get_cfg(
+            ["volunteer_rooms_path"],
+            default="data/volunteer_rooms.csv",
+            required=False,
+        )
+        self.volunteer_tokens_path = self._get_cfg(
+            ["volunteer_tokens_path"], default="data/volunteers.csv", required=False,
+        )
+        self.presenter_rooms_path = self._get_cfg(
+            ["presenter_rooms_path"],
+            default="data/presenter_rooms.csv",
+            required=False,
+        )
+        self.presenter_tokens_path = self._get_cfg(
+            ["presenter_tokens_path"], default="data/presenters.csv", required=False,
+        )
         self.community = self._get_cfg(["community"], required=False)
         self.volunteer_community = self._get_cfg(
             ["volunteer_community"], required=False
@@ -98,36 +114,40 @@ class Config(object):
         self.presenter_community = self._get_cfg(
             ["presenter_community"], required=False
         )
+        self.admin_csv_path = self._get_cfg(
+            ["admin_csv"], default="data/admin.csv", required=False,
+        )
+
         with open(self.tokens_path, "r") as f:
             reader = csv.reader(f)
             self.tokens = dict(reader)
         with open(self.rooms_path, "r") as f:
             self.rooms = f.read().splitlines()
         try:
-            with open("data/volunteers.csv", "r") as f:
+            with open(self.volunteer_tokens_path, "r") as f:
                 reader = csv.reader(f)
                 self.volunteer_tokens = dict(reader)
         except FileNotFoundError:
-            logger.error("No volunteers.csv")
+            logger.error("No volunteers csv")
             self.volunteer_tokens = {}
         try:
-            with open("data/volunteer_rooms.csv", "r") as f:
+            with open(self.volunteer_rooms_path, "r") as f:
                 self.volunteer_rooms = f.read().splitlines()
         except FileNotFoundError:
-            logger.error("No volunteer_rooms.csv")
+            logger.error("No volunteer_rooms csv")
             self.volunteer_rooms = []
         try:
-            with open("data/presenters.csv", "r") as f:
+            with open(self.presenter_tokens_path, "r") as f:
                 reader = csv.reader(f)
                 self.presenter_tokens = dict(reader)
         except FileNotFoundError:
-            logger.error("No presenters.csv")
+            logger.error("No presenters csv")
             self.presenter_tokens = {}
         try:
-            with open("data/presenter_rooms.csv", "r") as f:
+            with open(self.presenter_rooms_path, "r") as f:
                 self.presenter_rooms = f.read().splitlines()
         except FileNotFoundError:
-            logger.error("No presenter_rooms.csv")
+            logger.error("No presenter_rooms csv")
             self.presenter_rooms = []
 
     def _get_cfg(
