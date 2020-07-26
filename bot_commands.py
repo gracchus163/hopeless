@@ -8,7 +8,7 @@ from chat_functions import send_text_to_room
 
 logger = logging.getLogger(__name__)
 
-
+thanks_strs = ["thank", "ty", "thx"]
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
         """A command made by a user
@@ -67,7 +67,9 @@ class Command(object):
                 await self._invite_group()
         elif trigger.startswith("oncall"):
             await self._volunteer_request("oncall")
-        elif len(trigger) >= 63:
+        elif any(s in trigger for s in thanks_strs):
+            await send_text_to_room(self.client, self.room.room_id, "Hey no problem, have a good HOPE!") 
+        elif len(trigger) >= 63 and not ' ' in trigger:
             response = ( "I think you posted just your ticket code. Add the ticket code from your email after the command, like this: \n"
                     f"ticket a1b2c3d4e5\n"
                     f"or \n"
