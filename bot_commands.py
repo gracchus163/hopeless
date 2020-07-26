@@ -69,7 +69,7 @@ class Command(object):
                 await self._invite_group()
         elif trigger.startswith("oncall"):
             await self._volunteer_request("oncall")
-        elif any(s in trigger for s in thanks_strs):
+        elif None != re.search(r'\bty\b|\bthx\b|thank', trigger):
             await send_text_to_room(self.client, self.room.room_id, "Hey no problem, have a good HOPE!") 
         elif None != re.search(r'\bhi\b|\bhello\b|\bhey\b', trigger):
             await send_text_to_room(self.client, self.room.room_id, "Hi there, I'm a bot. Try typing help if you need some guidance") 
