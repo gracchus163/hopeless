@@ -1,6 +1,7 @@
 # coding=utf-8
 
 import logging
+import re
 
 from bot_actions import community_invite, is_admin, valid_token, get_roomid, is_authed, sync_data
 
@@ -9,6 +10,7 @@ from chat_functions import send_text_to_room
 logger = logging.getLogger(__name__)
 
 thanks_strs = ["thank", "ty", "thx"]
+hello_strs = ["hey", "hello", "hi"]
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
         """A command made by a user
@@ -69,6 +71,8 @@ class Command(object):
             await self._volunteer_request("oncall")
         elif any(s in trigger for s in thanks_strs):
             await send_text_to_room(self.client, self.room.room_id, "Hey no problem, have a good HOPE!") 
+        elif None != re.search(r'\bhi\b|\bhello\b|\bhey\b', trigger):
+            await send_text_to_room(self.client, self.room.room_id, "Hi there, I'm a bot. Try typing help if you need some guidance") 
         elif len(trigger) >= 63 and not ' ' in trigger:
             response = ( "I think you posted just your ticket code. Add the ticket code from your email after the command, like this: \n"
                     f"ticket a1b2c3d4e5\n"
