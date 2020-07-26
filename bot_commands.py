@@ -9,8 +9,6 @@ from chat_functions import send_text_to_room
 
 logger = logging.getLogger(__name__)
 
-thanks_strs = ["thank", "ty", "thx"]
-hello_strs = ["hey", "hello", "hi"]
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
         """A command made by a user
