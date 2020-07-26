@@ -59,6 +59,12 @@ class Command(object):
         elif trigger.startswith("sync"):
             if is_admin(self.config, self.event.sender):
                 await self._sync()
+        elif trigger.startswith("invite"):
+            if is_admin(self.config, self.event.sender):
+                await self._invite()
+        elif trigger.startswith("invite_group"):
+            if is_admin(self.config, self.event.sender):
+                await self._invite_group()
         elif trigger.startswith("oncall"):
             await self._volunteer_request("oncall")
         elif len(trigger) >= 63:
@@ -215,11 +221,43 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, "Sunk")
 
     async def _invite(self):
-        # TODO manually invite user to set of rooms
-        pass
-
+        # manually invite user to a room
+        if len(self.args) != 2:
+            response = ("Add the full username then the full room name after invite\n"
+                        f"'invite @user:server.net #room:server.net'"
+                        )
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        ret, room_id = get_roomid(self.client, self.args[1])
+        if not ret:
+            response = ("Could not find a roomid for that room name")
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        await self.client.room_invite(room_id, self.args[0])
+    async def _invite_group(self):
+        # manually invite user to a room
+        if len(self.args) != 2:
+            response = ("Add the full username then the group name after invite_group\n"
+                        f"'invite_group @user:server.net [attendee|volunteer|presenter]'"
+                        )
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        if self.args[1] == "attendee":
+            rooms = self.config.rooms
+        elif self.args[1] == "volunteer":
+            rooms = self.config.volunteer_rooms
+        elif self.args[1] == "presenter":
+            rooms = self.config.presenter_rooms
+        else:
+            response = ("not a valid group. attendee, volunteer or presenter")
+            await send_text_to_room(self.client, self.room.room_id, response)
+            return
+        for r in rooms:
+            await self.client.room_invite(r, self.args[0])
+        response = ("invited to {} group".format(self.args[1]))
+        await send_text_to_room(self.client, self.room.room_id, response)
     async def _join(self):
-        # user can be invited to rooms they are authorised for
+        # user can join (be invited to) rooms they are authorised for
         if len(self.args) != 1:
             response = (
                 "Add the fully qualified roomname after join like this:  \n"
