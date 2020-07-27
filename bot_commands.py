@@ -3,11 +3,18 @@
 import logging
 import re
 
-from bot_actions import community_invite, is_admin, valid_token, get_roomid, is_authed, sync_data
-
+from bot_actions import (
+    community_invite,
+    get_roomid,
+    is_admin,
+    is_authed,
+    sync_data,
+    valid_token,
+)
 from chat_functions import send_text_to_room
 
 logger = logging.getLogger(__name__)
+
 
 class Command(object):
     def __init__(self, client, store, config, command, room, event):
@@ -46,7 +53,7 @@ class Command(object):
             await self._process_request("attendee")
         elif trigger.startswith("volunteer"):
             await self._volunteer_request("volunteer")
-            #await self._process_request("volunteer")
+            # await self._process_request("volunteer")
         elif trigger.startswith("presenter"):
             await self._process_request("presenter")
         elif trigger.startswith("hack"):
@@ -59,24 +66,32 @@ class Command(object):
         elif trigger.startswith("sync"):
             if is_admin(self.config, self.event.sender):
                 await self._sync()
-        elif trigger.startswith("invite"):
-            if is_admin(self.config, self.event.sender):
-                await self._invite()
         elif trigger.startswith("invite_group"):
             if is_admin(self.config, self.event.sender):
                 await self._invite_group()
+        elif trigger.startswith("invite"):
+            if is_admin(self.config, self.event.sender):
+                await self._invite()
         elif trigger.startswith("oncall"):
             await self._volunteer_request("oncall")
-        elif None != re.search(r'\bty\b|\bthx\b|thank|\bthanx\b', trigger):
-            await send_text_to_room(self.client, self.room.room_id, "Hey no problem, have a good HOPE!") 
-        elif None != re.search(r'\bhi\b|\bhello\b|\bhey\b', trigger):
-            await send_text_to_room(self.client, self.room.room_id, "Hi there, I'm a bot. Try typing help if you need some guidance") 
-        elif len(trigger) >= 63 and not ' ' in trigger:
-            response = ( "I think you posted just your ticket code. Add the ticket code from your email after the command, like this: \n"
-                    f"ticket a1b2c3d4e5\n"
-                    f"or \n"
-                    f"presenter a1b2c3d4e5"
-                    )
+        elif re.search(r"\bty\b|\bthx\b|thank|\bthanx\b", trigger) is not None:
+            await send_text_to_room(
+                self.client, self.room.room_id, "Hey no problem, have a good HOPE!"
+            )
+        elif re.search(r"\bhi\b|\bhello\b|\bhey\b", trigger) is not None:
+            await send_text_to_room(
+                self.client,
+                self.room.room_id,
+                "Hi there, I'm a bot. Try typing `help` if you need some guidance",
+            )
+        elif len(trigger) >= 63 and " " not in trigger:
+            response = (
+                "I think you posted just your ticket code. Add the ticket "
+                "code from your email after the command, like this:  \n"
+                "`ticket a1b2c3d4e5...`  \n"
+                "or  \n"
+                "`presenter a1b2c3d4e5...`"
+            )
             await send_text_to_room(self.client, self.room.room_id, response)
 
     async def _process_request(self, ticket_type):
@@ -150,8 +165,13 @@ class Command(object):
         if len(self.args) != 1:
             return
         if self.args[0] != self.config.volunteer_pass:
-            response = ("Sorry, wrong password, try again?")
-            #response = ("What are you, stoned or stupid? You don't hack a bank across state lines from your house, you'll get nailed by the FBI. Where are your brains, in your ass? Don't you know anything?")
+            response = "Sorry, wrong password, try again?"
+            # response = (
+            #     "What are you, stoned or stupid? You don't hack a "
+            #     "bank across state lines from your house, you'll get nailed "
+            #     "by the FBI. Where are your brains, in your ass? Don't you "
+            #     "know anything?"
+            # )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         if req_type == "oncall":
@@ -164,10 +184,12 @@ class Command(object):
             for r in self.config.volunteer_rooms:
                 await self.client.room_invite(r, self.event.sender)
             await send_text_to_room(
-                self.client, self.room.room_id, "Inviting you to the volunteer community"
+                self.client,
+                self.room.room_id,
+                "Inviting you to the volunteer community",
             )
             await community_invite(
-            self.client, self.config.volunteer_community, self.event.sender
+                self.client, self.config.volunteer_community, self.event.sender
             )
 
     async def _show_help(self):
@@ -213,7 +235,7 @@ class Command(object):
             return
         ret, room_id = await get_roomid(self.client, self.args[0])
         if not ret:
-            response = ("Could not find a roomid for that room name")
+            response = "Could not find a roomid for that room name"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         await send_text_to_room(self.client, room_id, msg)
@@ -227,23 +249,26 @@ class Command(object):
     async def _invite(self):
         # manually invite user to a room
         if len(self.args) != 2:
-            response = ("Add the full username then the full room name after invite\n"
-                        f"'invite @user:server.net #room:server.net'"
-                        )
+            response = (
+                "Add the full username then the full room name after invite:  \n"
+                "`invite @user:server.net #room:server.net`"
+            )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        ret, room_id = get_roomid(self.client, self.args[1])
+        ret, room_id = await get_roomid(self.client, self.args[1])
         if not ret:
-            response = ("Could not find a roomid for that room name")
+            response = "Could not find a roomid for that room name"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         await self.client.room_invite(room_id, self.args[0])
+
     async def _invite_group(self):
         # manually invite user to a room
         if len(self.args) != 2:
-            response = ("Add the full username then the group name after invite_group\n"
-                        f"'invite_group @user:server.net [attendee|volunteer|presenter]'"
-                        )
+            response = (
+                "Add the full username then the group name after invite_group:  \n"
+                "`invite_group @user:server.net [attendee|volunteer|presenter]`"
+            )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         if self.args[1] == "attendee":
@@ -253,25 +278,26 @@ class Command(object):
         elif self.args[1] == "presenter":
             rooms = self.config.presenter_rooms
         else:
-            response = ("not a valid group. attendee, volunteer or presenter")
+            response = "not a valid group. attendee, volunteer or presenter"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         for r in rooms:
             await self.client.room_invite(r, self.args[0])
-        response = ("invited to {} group".format(self.args[1]))
+        response = "invited to {} group".format(self.args[1])
         await send_text_to_room(self.client, self.room.room_id, response)
+
     async def _join(self):
         # user can join (be invited to) rooms they are authorised for
         if len(self.args) != 1:
             response = (
                 "Add the fully qualified roomname after join like this:  \n"
-                f"`join #oncall:hope.net`"
+                "`join #oncall:hope.net`"
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         ret, r = await get_roomid(self.client, self.args[0])
         if not ret:
-            response = ("Could not find a roomid for that room name")
+            response = "Could not find a roomid for that room name"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         if await is_authed(self.client, self.config, self.event.sender, r):
