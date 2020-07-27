@@ -6,7 +6,7 @@ from hashlib import sha256
 import logging
 from os import fsync, rename
 
-from nio import Api,RoomResolveAliasResponse
+from nio import Api, RoomResolveAliasResponse
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +51,7 @@ def is_admin(config, user):
         logging.error("No admin csv")
     return False
 
+
 async def write_csv(config, ticket_type):
     logger.info("Writing %s ticket csv", ticket_type)
 
@@ -88,6 +89,7 @@ async def periodic_sync(config):
         await sleep(config.sync_interval)
         await sync_data(config)
 
+
 async def get_roomid(client, alias):
     resp = await client.room_resolve_alias(alias)
     print(resp)
@@ -96,15 +98,15 @@ async def get_roomid(client, alias):
         return False, ""
     return True, resp.room_id
 
+
 async def is_authed(client, config, sender, roomid):
-#  GET /groups/<group_id>/users
-#    path = "groups/{}/rooms".format("+hopeless:hope.net")
-#    query_parameters = {"access_token": client.access_token} 
-#    path = Api._build_path(path, query_parameters)
-#    resp = await client._send("GET", path )
-#    print(resp)
+    #   GET /groups/<group_id>/users
+    #    path = "groups/{}/rooms".format("+hopeless:hope.net")
+    #    query_parameters = {"access_token": client.access_token}
+    #    path = Api._build_path(path, query_parameters)
+    #    resp = await client._send("GET", path )
+    #    print(resp)
     if sender in config.volunteer_tokens.values():
         print("authed for volunteers")
         await client.room_invite(roomid, sender)
     return False
-
