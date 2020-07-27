@@ -255,7 +255,7 @@ class Command(object):
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        ret, room_id = get_roomid(self.client, self.args[1])
+        ret, room_id = await get_roomid(self.client, self.args[1])
         if not ret:
             response = "Could not find a roomid for that room name"
             await send_text_to_room(self.client, self.room.room_id, response)
