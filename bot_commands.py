@@ -66,12 +66,12 @@ class Command(object):
         elif trigger.startswith("sync"):
             if is_admin(self.config, self.event.sender):
                 await self._sync()
-        elif trigger.startswith("invite"):
-            if is_admin(self.config, self.event.sender):
-                await self._invite()
         elif trigger.startswith("invite_group"):
             if is_admin(self.config, self.event.sender):
                 await self._invite_group()
+        elif trigger.startswith("invite"):
+            if is_admin(self.config, self.event.sender):
+                await self._invite()
         elif trigger.startswith("oncall"):
             await self._volunteer_request("oncall")
         elif re.search(r"\bty\b|\bthx\b|thank", trigger) is not None:
