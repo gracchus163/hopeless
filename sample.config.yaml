@@ -21,7 +21,7 @@ matrix:
 
 storage:
   # The path to the database
-  database_filepath: "data/bot.db"
+  database_filepath: "data/store/bot.db"
   # The path to a directory for internal bot storage
   # containing encryption keys, sync tokens, etc.
   store_filepath: "data/store"
