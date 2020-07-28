@@ -1,9 +1,14 @@
 # coding=utf-8
 
+from datetime import datetime
 import logging
 import re
 
+from dateutil import tz
+
 from bot_actions import (
+    add_announcement,
+    Announcement,
     community_invite,
     get_roomid,
     is_admin,
@@ -43,7 +48,7 @@ class Command(object):
 
     async def process(self):
         """Process the command"""
-        logging.debug("Got command from %s: %r", self.event.sender, self.command)
+        logger.debug("Got command from %s: %r", self.event.sender, self.command)
         trigger = self.command.lower()
         if trigger.startswith("help"):
             await self._show_help()
@@ -74,6 +79,9 @@ class Command(object):
                 await self._invite()
         elif trigger.startswith("oncall"):
             await self._volunteer_request("oncall")
+        elif trigger.startswith("schedule_announce"):
+            if is_admin(self.config, self.event.sender):
+                await self._schedule_announcement()
         elif re.search(r"\bty\b|\bthx\b|thank|\bthanx\b", trigger) is not None:
             await send_text_to_room(
                 self.client, self.room.room_id, "Hey no problem, have a good HOPE!"
@@ -103,7 +111,7 @@ class Command(object):
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        logging.debug("ticket cmd from %s for %s", self.event.sender, ticket_type)
+        logger.debug("ticket cmd from %s for %s", self.event.sender, ticket_type)
         token = str(self.args[0])
         if len(token) != 64:
             response = (
@@ -136,7 +144,7 @@ class Command(object):
                     f"{ticket_type} chat rooms and community."
                 )
                 await send_text_to_room(self.client, self.room.room_id, response)
-                logging.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
+                logger.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
                 for r in rooms:
                     await self.client.room_invite(r, self.event.sender)
                 await community_invite(self.client, group, self.event.sender)
@@ -145,7 +153,7 @@ class Command(object):
                     tokens[h] = self.event.sender
                 return
             else:
-                logging.info(
+                logger.info(
                     "ticket invalid: %s: %s %s (%s)",
                     self.event.sender,
                     ticket_type,
@@ -220,7 +228,7 @@ class Command(object):
 
     async def _notice(self):
         msg = "@room\n" + self.command.split(maxsplit=2)[2]
-        logging.warning(
+        logger.warning(
             "notice used by %s at %s to send: %r",
             self.event.sender,
             self.room.room_id,
@@ -242,7 +250,7 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, "Sent")
 
     async def _sync(self):
-        logging.warning("sync used by %s", self.event.sender)
+        logger.warning("sync used by %s", self.event.sender)
         await sync_data(self.config)
         await send_text_to_room(self.client, self.room.room_id, "Sunk")
 
@@ -302,3 +310,73 @@ class Command(object):
             return
         if await is_authed(self.client, self.config, self.event.sender, r):
             print("TODO")
+
+    async def _schedule_announcement(self):
+        """Add a scheduled announcement
+        This does NOT automatically tag @room
+        """
+        if len(self.args) < 3:
+            await send_text_to_room(
+                self.client,
+                self.room.room_id,
+                (
+                    "Usage:  \n"
+                    f"`{self.command} 2020-07-30T15:30:00 #room-name:hope.net "
+                    "@room\\n# Hello!\\nThis is a test.`  \n"
+                    "Dates and times must be LOCALTIME. "
+                    "You must use `@room` in the message if you want it. "
+                    "Double check your message, only the bot admin can fix errors!"
+                ),
+            )
+            return
+
+        parts = self.command.split(maxsplit=3)[1:]
+        # Time
+        try:
+            time = datetime.fromisoformat(parts[0])
+        except ValueError as e:
+            await send_text_to_room(
+                self.client,
+                self.room.room_id,
+                f"Error: `{e}`  \n"
+                "Time should be localtime and formatted like 2020-07-30T15:30",
+            )
+            return
+        time = time.replace(tzinfo=tz.gettz("America/New_York"))
+        future = time - datetime.now(tz.UTC)
+        if future.total_seconds() < 10:
+            await send_text_to_room(
+                self.client, self.room.room_id, "Time must be in the future"
+            )
+            return
+        # Room
+        room = parts[1]
+        ret, room_id = await get_roomid(self.client, room)
+        if not ret:
+            await send_text_to_room(
+                self.client,
+                self.room.room_id,
+                "Could not find a roomid for that room name",
+            )
+            return
+        # Message
+        message = parts[2]
+
+        logger.info(
+            "Announcement scheduled for %s at %s by %s: %r",
+            room,
+            time,
+            self.event.sender,
+            message,
+        )
+
+        await add_announcement(
+            self.config, Announcement(self.client, time, room, message)
+        )
+        await send_text_to_room(
+            self.client,
+            self.room.room_id,
+            "Scheduled for {}d{}h{}m from now".format(
+                future.days, future.seconds // (60 * 60), (future.seconds // 60) % 60
+            ),
+        )

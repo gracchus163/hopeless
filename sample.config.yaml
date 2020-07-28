@@ -43,7 +43,7 @@ logging:
     # Whether logging to the console is enabled
     enabled: true
 
-repeat_community_invite: false 
+repeat_community_invite: false
 sync_interval: 30
 
 rooms_path: "data/rooms.csv"
@@ -53,3 +53,4 @@ volunteer_community: "+name:server.net"
 presenter_community: "+name:server.net"
 volunteer_pass: "hunter2"
 oncall_room: "#name:server.net"
+announcement_csv: "data/announcements.csv"
