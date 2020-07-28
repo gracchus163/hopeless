@@ -8,8 +8,9 @@ import re
 import sys
 from typing import Any, List
 
-from errors import ConfigError
 import yaml
+
+from errors import ConfigError
 
 logger = logging.getLogger()
 
@@ -153,6 +154,12 @@ class Config(object):
         self.sync_interval = int(
             self._get_cfg(["sync_interval"], default=300, required=False,)
         )
+
+        self._announcements = []
+        self.announcement_csv = self._get_cfg(
+            ["announcement_csv"], default="data/announcements.csv", required=False,
+        )
+        self._announcement_lock = Lock()
 
         self._attendee_token_lock = Lock()
         self._presenter_token_lock = Lock()

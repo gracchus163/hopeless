@@ -2,15 +2,13 @@
 # coding=utf-8
 
 import asyncio
+import csv
 import logging
 from signal import SIGINT, SIGTERM
 import sys
 from time import sleep
 
 from aiohttp import ClientConnectionError, ServerDisconnectedError
-from bot_actions import periodic_sync, sync_data
-from callbacks import Callbacks
-from config import Config
 from nio import (
     AsyncClient,
     AsyncClientConfig,
@@ -19,6 +17,10 @@ from nio import (
     LoginError,
     RoomMessageText,
 )
+
+from bot_actions import add_announcement, Announcement, periodic_sync, sync_data
+from callbacks import Callbacks
+from config import Config
 from storage import Storage
 
 logger = logging.getLogger(__name__)
@@ -28,12 +30,12 @@ async def shutdown(loop, client, config, signal=None):
     if getattr(config, "stopping", False):
         return
     config.stopping = True
-    logging.info("Shutting down for %s", signal.name if signal else "command")
+    logger.info("Shutting down for %s", signal.name if signal else "command")
     await client.close()
     config.sync_task.cancel()
     await sync_data(config)
     loop.stop()
-    logging.info("Goodbye")
+    logger.info("Goodbye")
 
 
 async def main():
@@ -82,9 +84,22 @@ async def main():
     # Periodic token save
     config.sync_task = asyncio.create_task(periodic_sync(config))
 
+    # Schedule announcements
+    try:
+        with open(config.announcement_csv, "r") as f:
+            reader = csv.reader(f)
+            for record in reader:
+                await add_announcement(
+                    config,
+                    Announcement(client, record[0], record[1], record[2]),
+                    write=False,
+                )
+    except FileNotFoundError:
+        logger.error("No announcements csv")
+
     # Keep trying to reconnect on failure (with some time in-between)
     while True:
-        logging.debug("Starting client")
+        logger.debug("Starting client")
         try:
             # Try to login with the configured username/password
             try:
