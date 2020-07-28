@@ -6,3 +6,13 @@ exclude =
     venv/*
 accept-encodings = utf-8
 ignore = E203
+application-import-names =
+    bot_actions
+    bot_commands
+    callbacks
+    chat_functions
+    config
+    errors
+    main
+    message_responses
+    storage

@@ -2,13 +2,14 @@
 # coding=utf-8
 
 import asyncio
+import csv
 import logging
 from signal import SIGINT, SIGTERM
 import sys
 from time import sleep
 
 from aiohttp import ClientConnectionError, ServerDisconnectedError
-from bot_actions import periodic_sync, sync_data
+from bot_actions import add_announcement, Announcement, periodic_sync, sync_data
 from callbacks import Callbacks
 from config import Config
 from nio import (
@@ -81,6 +82,19 @@ async def main():
 
     # Periodic token save
     config.sync_task = asyncio.create_task(periodic_sync(config))
+
+    # Schedule announcements
+    try:
+        with open(config.announcement_csv, "r") as f:
+            reader = csv.reader(f)
+            for record in reader:
+                await add_announcement(
+                    config,
+                    Announcement(client, record[0], record[1], record[2]),
+                    write=False,
+                )
+    except FileNotFoundError:
+        logger.error("No announcements csv")
 
     # Keep trying to reconnect on failure (with some time in-between)
     while True:
