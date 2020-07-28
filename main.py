@@ -9,9 +9,6 @@ import sys
 from time import sleep
 
 from aiohttp import ClientConnectionError, ServerDisconnectedError
-from bot_actions import add_announcement, Announcement, periodic_sync, sync_data
-from callbacks import Callbacks
-from config import Config
 from nio import (
     AsyncClient,
     AsyncClientConfig,
@@ -20,6 +17,10 @@ from nio import (
     LoginError,
     RoomMessageText,
 )
+
+from bot_actions import add_announcement, Announcement, periodic_sync, sync_data
+from callbacks import Callbacks
+from config import Config
 from storage import Storage
 
 logger = logging.getLogger(__name__)

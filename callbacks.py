@@ -3,9 +3,10 @@
 from asyncio import create_task
 import logging
 
+from nio import JoinError
+
 from bot_commands import Command
 from message_responses import Message
-from nio import JoinError
 
 logger = logging.getLogger(__name__)
 
