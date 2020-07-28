@@ -48,7 +48,7 @@ class Command(object):
 
     async def process(self):
         """Process the command"""
-        logging.debug("Got command from %s: %r", self.event.sender, self.command)
+        logger.debug("Got command from %s: %r", self.event.sender, self.command)
         trigger = self.command.lower()
         if trigger.startswith("help"):
             await self._show_help()
@@ -111,7 +111,7 @@ class Command(object):
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        logging.debug("ticket cmd from %s for %s", self.event.sender, ticket_type)
+        logger.debug("ticket cmd from %s for %s", self.event.sender, ticket_type)
         token = str(self.args[0])
         if len(token) != 64:
             response = (
@@ -144,7 +144,7 @@ class Command(object):
                     f"{ticket_type} chat rooms and community."
                 )
                 await send_text_to_room(self.client, self.room.room_id, response)
-                logging.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
+                logger.debug("Inviting %s to %s", self.event.sender, ",".join(rooms))
                 for r in rooms:
                     await self.client.room_invite(r, self.event.sender)
                 await community_invite(self.client, group, self.event.sender)
@@ -153,7 +153,7 @@ class Command(object):
                     tokens[h] = self.event.sender
                 return
             else:
-                logging.info(
+                logger.info(
                     "ticket invalid: %s: %s %s (%s)",
                     self.event.sender,
                     ticket_type,
@@ -228,7 +228,7 @@ class Command(object):
 
     async def _notice(self):
         msg = "@room\n" + self.command.split(maxsplit=2)[2]
-        logging.warning(
+        logger.warning(
             "notice used by %s at %s to send: %r",
             self.event.sender,
             self.room.room_id,
@@ -250,7 +250,7 @@ class Command(object):
         await send_text_to_room(self.client, self.room.room_id, "Sent")
 
     async def _sync(self):
-        logging.warning("sync used by %s", self.event.sender)
+        logger.warning("sync used by %s", self.event.sender)
         await sync_data(self.config)
         await send_text_to_room(self.client, self.room.room_id, "Sunk")
 
@@ -362,7 +362,7 @@ class Command(object):
         # Message
         message = parts[2]
 
-        logging.info(
+        logger.info(
             "Announcement scheduled for %s at %s by %s: %r",
             room,
             time,

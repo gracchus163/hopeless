@@ -30,12 +30,12 @@ async def shutdown(loop, client, config, signal=None):
     if getattr(config, "stopping", False):
         return
     config.stopping = True
-    logging.info("Shutting down for %s", signal.name if signal else "command")
+    logger.info("Shutting down for %s", signal.name if signal else "command")
     await client.close()
     config.sync_task.cancel()
     await sync_data(config)
     loop.stop()
-    logging.info("Goodbye")
+    logger.info("Goodbye")
 
 
 async def main():
@@ -99,7 +99,7 @@ async def main():
 
     # Keep trying to reconnect on failure (with some time in-between)
     while True:
-        logging.debug("Starting client")
+        logger.debug("Starting client")
         try:
             # Try to login with the configured username/password
             try:
