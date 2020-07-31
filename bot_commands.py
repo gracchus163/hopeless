@@ -52,34 +52,34 @@ class Command(object):
         trigger = self.command.lower()
         if trigger.startswith("help"):
             await self._show_help()
-        elif trigger.startswith("request"):
+        elif trigger == "request" :
             await self._process_request("attendee")
-        elif trigger.startswith("ticket"):
+        elif trigger == "ticket" :
             await self._process_request("attendee")
-        elif trigger.startswith("volunteer"):
+        elif trigger == "volunteer" :
             await self._volunteer_request("volunteer")
             # await self._process_request("volunteer")
-        elif trigger.startswith("presenter"):
+        elif trigger == "presenter" :
             await self._process_request("presenter")
-        elif trigger.startswith("hack"):
+        elif trigger == "hack" :
             await self._the_planet()
-        elif trigger.startswith("trashing"):
+        elif trigger == "trashing" :
             await self._trashing()
-        elif trigger.startswith("notice"):
+        elif trigger == "notice" :
             if is_admin(self.config, self.event.sender):
                 await self._notice()
-        elif trigger.startswith("sync"):
+        elif trigger == "sync" :
             if is_admin(self.config, self.event.sender):
                 await self._sync()
-        elif trigger.startswith("invite_group"):
+        elif trigger == "invite_group" :
             if is_admin(self.config, self.event.sender):
                 await self._invite_group()
-        elif trigger.startswith("invite"):
+        elif trigger == "invite" :
             if is_admin(self.config, self.event.sender):
                 await self._invite()
-        elif trigger.startswith("oncall"):
+        elif trigger == "oncall" :
             await self._volunteer_request("oncall")
-        elif trigger.startswith("schedule_announce"):
+        elif trigger == "schedule_announce" :
             if is_admin(self.config, self.event.sender):
                 await self._schedule_announcement()
         elif re.search(r"\bty\b|\bthx\b|thank|\bthanx\b", trigger) is not None:
@@ -112,9 +112,11 @@ class Command(object):
             await send_text_to_room(self.client, self.room.room_id, response)
             return
         logger.debug("ticket cmd from %s for %s", self.event.sender, ticket_type)
-        token = str(self.args[0])
+        token = str(self.args[0]).strip("<>")
         if len(token) != 64:
             response = (
+                "Add the ticket code from your email after the command, like this:  \n"
+                f"'{self.command} a1b2c3d4e5g6...'"
                 "Token must be 64 characters, check your ticket again or if you "
                 "have trouble, please send an email to helpdesk2020@helpdesk.hope.net"
             )
@@ -246,7 +248,7 @@ class Command(object):
             response = "Could not find a roomid for that room name"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        await send_text_to_room(self.client, room_id, msg)
+        await send_text_to_room(self.client, room_id, msg,notice=False)
         await send_text_to_room(self.client, self.room.room_id, "Sent")
 
     async def _sync(self):
