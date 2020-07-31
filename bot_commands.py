@@ -246,7 +246,7 @@ class Command(object):
             response = "Could not find a roomid for that room name"
             await send_text_to_room(self.client, self.room.room_id, response)
             return
-        await send_text_to_room(self.client, room_id, msg)
+        await send_text_to_room(self.client, room_id, msg, notice=False)
         await send_text_to_room(self.client, self.room.room_id, "Sent")
 
     async def _sync(self):
