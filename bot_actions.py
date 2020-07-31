@@ -156,7 +156,7 @@ class Announcement:
                 "Could not find a roomid for scheduled message to %s", self.room
             )
             return
-        await send_text_to_room(self._client, room_id, self.message)
+        await send_text_to_room(self._client, room_id, self.message, notice=False)
 
 
 async def add_announcement(config, new_announcement, write=True):
