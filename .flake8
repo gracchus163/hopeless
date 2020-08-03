@@ -5,7 +5,7 @@ exclude =
     env/*
     venv/*
 accept-encodings = utf-8
-ignore = E203
+ignore = E203,W503
 application-import-names =
     bot_actions
     bot_commands

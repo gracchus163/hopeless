@@ -15,6 +15,7 @@ from nio import (
     InviteMemberEvent,
     LocalProtocolError,
     LoginError,
+    RoomMemberEvent,
     RoomMessageText,
 )
 
@@ -80,6 +81,8 @@ async def main():
     callbacks = Callbacks(client, store, config)
     client.add_event_callback(callbacks.message, (RoomMessageText,))
     client.add_event_callback(callbacks.invite, (InviteMemberEvent,))
+    client.add_event_callback(callbacks.welcome, (RoomMemberEvent,))
+    client.add_event_callback(callbacks.message_hopenet, (RoomMessageText,))
 
     # Periodic token save
     config.sync_task = asyncio.create_task(periodic_sync(config))

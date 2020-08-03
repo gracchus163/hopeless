@@ -214,3 +214,54 @@ async def is_authed(client, config, sender, roomid):
         logger.info("authed for volunteers")
         await client.room_invite(roomid, sender)
     return False
+
+
+async def check_hopenet(
+    client, config, room, event, user: str, only_fail: bool = False
+):
+    """Screen room for autoresponse if hopenet account"""
+    # If not a warn room, never mind
+    if room.machine_name not in config.hopenet_warn_rooms:
+        return
+
+    await warn_if_hopenet(client, config, room, event, user, only_fail)
+
+
+async def warn_if_hopenet(
+    client, config, room, event, user: str, only_fail: bool = False
+):
+    """Unconditionally respond, eg. for command"""
+    logger.debug("Warn hopenet? %s", user)
+
+    if not user.startswith("@") or ":" not in user:
+        message = (
+            "Sorry, that doesn't look like a full Matrix username! It should "
+            "look like `@user:example.com`"
+        )
+        await send_text_to_room(client, room.room_id, message, notice=False)
+        return
+
+    if user.endswith(":hope.net"):
+        logger.debug("Warning hopenet: %s in %s", user, room.named_room_name())
+        message = (
+            f"Hello, {user}!  \n"
+            "**Warning: You are using a hope.net Matrix account.**  \n"
+            "Your account will disappear soon along with the server. Please "
+            "see the [migration information]"
+            "(https://wiki.hope.net/index.php?title=Matrix_How-To) "
+            "if you want to keep chatting on Matrix!"
+        )
+        await send_text_to_room(client, room.room_id, message, notice=False)
+        return
+
+    if only_fail:
+        return
+
+    message = (
+        f"Hello, {user}!  \n"
+        "✅ You're using a Matrix account that's not on hope.net.  \n"
+        "This means you'll be able to continue chatting after the HOPE "
+        "Matrix server is shut down. "
+        "[FAQ](https://wiki.hope.net/index.php?title=Matrix_How-To)"
+    )
+    await send_text_to_room(client, room.room_id, message, notice=False)

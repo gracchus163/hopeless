@@ -151,6 +151,15 @@ class Config(object):
             logger.error("No presenter_rooms csv")
             self.presenter_rooms = []
 
+        self._hopenet_warn_lock = Lock()
+        self.hopenet_warn_times = {}
+        self.hopenet_warn_rooms = self._get_cfg(
+            ["hopenet_warn_rooms"], default=[], required=False,
+        )
+        self.hopenet_warn_interval = self._get_cfg(
+            ["hopenet_warn_interval"], default=60, required=False,
+        )
+
         self.sync_interval = int(
             self._get_cfg(["sync_interval"], default=300, required=False,)
         )

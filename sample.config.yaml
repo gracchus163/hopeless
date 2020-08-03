@@ -54,3 +54,9 @@ presenter_community: "+name:server.net"
 volunteer_pass: "hunter2"
 oncall_room: "#name:server.net"
 announcement_csv: "data/announcements.csv"
+
+# minimum minutes to wait before nagging to migrate off hope.net
+hopenet_warn_interval: 60
+hopenet_warn_rooms:
+  - "#goodbye:hope.net"
+  - "#goodbyehope:fairydust.space"
