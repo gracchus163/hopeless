@@ -49,37 +49,37 @@ class Command(object):
     async def process(self):
         """Process the command"""
         logger.debug("Got command from %s: %r", self.event.sender, self.command)
-        trigger = self.command.lower()
+        trigger = self.command.lower().split(maxsplit=1)[0]
         if trigger.startswith("help"):
             await self._show_help()
-        elif trigger == "request" :
+        elif trigger == "request":
             await self._process_request("attendee")
-        elif trigger == "ticket" :
+        elif trigger == "ticket":
             await self._process_request("attendee")
-        elif trigger == "volunteer" :
+        elif trigger == "volunteer":
             await self._volunteer_request("volunteer")
             # await self._process_request("volunteer")
-        elif trigger == "presenter" :
+        elif trigger == "presenter":
             await self._process_request("presenter")
-        elif trigger == "hack" :
+        elif trigger == "hack":
             await self._the_planet()
-        elif trigger == "trashing" :
+        elif trigger == "trashing":
             await self._trashing()
-        elif trigger == "notice" :
+        elif trigger == "notice":
             if is_admin(self.config, self.event.sender):
                 await self._notice()
-        elif trigger == "sync" :
+        elif trigger == "sync":
             if is_admin(self.config, self.event.sender):
                 await self._sync()
-        elif trigger == "invite_group" :
+        elif trigger == "invite_group":
             if is_admin(self.config, self.event.sender):
                 await self._invite_group()
-        elif trigger == "invite" :
+        elif trigger == "invite":
             if is_admin(self.config, self.event.sender):
                 await self._invite()
-        elif trigger == "oncall" :
+        elif trigger == "oncall":
             await self._volunteer_request("oncall")
-        elif trigger == "schedule_announce" :
+        elif trigger == "schedule_announce":
             if is_admin(self.config, self.event.sender):
                 await self._schedule_announcement()
         elif re.search(r"\bty\b|\bthx\b|thank|\bthanx\b", trigger) is not None:
