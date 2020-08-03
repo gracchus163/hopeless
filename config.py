@@ -183,7 +183,7 @@ class Config(object):
             # If at any point we don't get our expected option...
             if config is None:
                 # Raise an error if it was required
-                if required or not default:
+                if required or default is None:
                     raise ConfigError(f"Config option {'.'.join(path)} is required")
 
                 # or return the default value
