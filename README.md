@@ -1,6 +1,19 @@
 # Hope 2020 matrix bot
 Based on the extremely useful nio-template
 Users message the bot with their ticket token which is validated and they get invited to the conference matrix rooms.
+## Features
+Sending a DM to the bot or prefixing with the command string (default !c) followed by the below commands will trigger the behaviour
+* ticket \<token\>     #authenticates user and invites them to the attendee rooms
+* presenter \<token\>  #authenticates user and invites them to the presenter rooms
+* volunteer \<password\> #grants access to the volunteer rooms
+* oncall \<password\>    #allows joining and leaving the volunteer oncall room
+* Realistic AI responds to phrases such as "hello" and "thanks"
+ ### Admin commands
+* notice \<room\> \<string\>,,,    #sends an @room notice to specified room
+* sync   #syncs the token list to disk
+* invite \<user\> \<room\>   #invite user to room
+* nvite_group \<user\> \<group\>  #invite user to group of rooms
+* schedule_announce \<timestamp\> \<room\> \<string\>,,,  #schedule an annoucement
 ## Running
 To build with docker: run `docker build -f docker/Dockerfile -t hopeless:latest .` in the repo root dir.
 
@@ -17,8 +30,9 @@ Running:
 `python main.py`
 
 **TODO** in order of importance:
-* Nice, helpful messages
-* "welcome-bot" functionality
+* "welcome-bot" functionality - auto-message new users on the server
+* Better utility for volunteers, maybe not a token system
+* hot-reload of tickets
 
 ## Project structure
 
