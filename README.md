@@ -12,7 +12,7 @@ Sending a DM to the bot or prefixing with the command string (default !c) follow
 * notice \<room\> \<string\>,,,    #sends an @room notice to specified room
 * sync   #syncs the token list to disk
 * invite \<user\> \<room\>   #invite user to room
-* nvite_group \<user\> \<group\>  #invite user to group of rooms
+* invite_group \<user\> \<group\>  #invite user to group of rooms
 * schedule_announce \<timestamp\> \<room\> \<string\>,,,  #schedule an annoucement
 ## Running
 To build with docker: run `docker build -f docker/Dockerfile -t hopeless:latest .` in the repo root dir.
