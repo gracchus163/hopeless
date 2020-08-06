@@ -1,4 +1,6 @@
-# Hope 2020 matrix bot
+# Hope 2020 Matrix bot
+
+Otherwise known as HOPE CoreBot.  
 Based on the extremely useful nio-template  
 Users message the bot with their ticket token which is validated and they get invited to the conference matrix rooms.  
 ![Example](example.png)
@@ -16,17 +18,29 @@ Sending a DM to the bot or prefixing with the command string (default !c) follow
 * invite_group \<user\> \<group\>  #invite user to group of rooms
 * schedule_announce \<timestamp\> \<room\> \<string\>,,,  #schedule an annoucement
 ## Running
-To build with docker: run `docker build -f docker/Dockerfile -t hopeless:latest .` in the repo root dir.
 
-git clone and copy sample.config.yaml to data/config.yaml and fill in the user and server details.
-Also in data/, rooms.csv holds a newline separated list of the room ids (no commas)
-tokens.csv holds hashes of 64 char tokens followed by either "unused" or the
-user's name
+**Important!: you should override rate-limiting for the bot user so the server doesn't drop rapid invites.**  
 
-Running with docker:
+To do this, connect to the postgres db and run this:  
+`insert into ratelimit_override values ('@hopeless:my-homeserver.chat', 0, 0);`
+
+
+**To build with docker:** run  
+`docker build -f docker/Dockerfile -t hopeless:latest .` 
+in the repo root dir.
+
+**Running with docker:**  
 `docker run -v $(pwd)/data:/data hopeless:latest`
 
-Running:
+To configure:
+
+`git clone` 
+`cp sample.config.yaml data/config.yaml`  
+then fill in the user and server details.  
+Also in data/, `rooms.csv` holds a newline separated list of the room IDs (no commas)
+`tokens.csv` holds hashes of 64 char tokens followed by either "unused" or the user's name.
+
+**Running from source:**
 
 `python main.py`
 
