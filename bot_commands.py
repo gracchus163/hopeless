@@ -107,7 +107,7 @@ class Command(object):
         if not self.args:
             response = (
                 "Add the ticket code from your email after the command, like this:  \n"
-                f"`{self.command} a1b2c3d4e5...`"
+                f"`{ self.command.lower().split(maxsplit=1)[0] } a1b2c3d4e5...`"
             )
             await send_text_to_room(self.client, self.room.room_id, response)
             return
@@ -116,7 +116,7 @@ class Command(object):
         if len(token) != 64:
             response = (
                 "Add the ticket code from your email after the command, like this:  \n"
-                f"'{self.command} a1b2c3d4e5g6...'"
+                f"`{ self.command.lower().split(maxsplit=1)[0] } a1b2c3d4e5...`"
                 "Token must be 64 characters, check your ticket again or if you "
                 "have trouble, please send an email to helpdesk2020@helpdesk.hope.net"
             )
