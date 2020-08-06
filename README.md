@@ -1,6 +1,7 @@
 # Hope 2020 matrix bot
-Based on the extremely useful nio-template
-Users message the bot with their ticket token which is validated and they get invited to the conference matrix rooms.
+Based on the extremely useful nio-template  
+Users message the bot with their ticket token which is validated and they get invited to the conference matrix rooms.  
+![Example](example.png)
 ## Features
 Sending a DM to the bot or prefixing with the command string (default !c) followed by the below commands will trigger the behaviour
 * ticket \<token\>     #authenticates user and invites them to the attendee rooms
