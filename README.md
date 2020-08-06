@@ -25,14 +25,16 @@ To do this, connect to the postgres db and run this:
 `insert into ratelimit_override values ('@hopeless:my-homeserver.chat', 0, 0);`
 
 
-**To build with docker:** run  
-`docker build -f docker/Dockerfile -t hopeless:latest .` 
-in the repo root dir.
+**To build with docker:**
+`git clone https://github.com/gracchus163/hopeless.git`  
+` cd hopeless`  
+`docker build -f docker/Dockerfile -t hopeless:latest .`  
+
 
 **Running with docker:**  
 `docker run -v $(pwd)/data:/data hopeless:latest`
 
-To configure:
+**To configure:**
 
 `git clone` 
 `cp sample.config.yaml data/config.yaml`  
